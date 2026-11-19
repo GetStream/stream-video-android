@@ -20,7 +20,6 @@ import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.call.RtcSession
-import io.getstream.webrtc.PeerConnection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
@@ -32,6 +31,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.webrtc.PeerConnection
 import java.util.concurrent.atomic.AtomicBoolean
 
 private typealias TrackId = String

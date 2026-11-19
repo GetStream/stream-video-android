@@ -73,8 +73,7 @@ public object Serializer {
         .add(io.getstream.android.video.internal.generated.infrastructure.URIAdapter())
         .add(io.getstream.android.video.internal.generated.infrastructure.UUIDAdapter())
         .add(io.getstream.android.video.internal.generated.infrastructure.InstantAdapter())
-        .addLast(com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory())
-    
+
     @JvmStatic
     public val moshi: Moshi by lazy {
         moshiBuilder.build()

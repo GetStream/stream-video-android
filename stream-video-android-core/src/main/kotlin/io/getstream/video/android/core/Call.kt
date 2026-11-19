@@ -97,9 +97,7 @@ import io.getstream.video.android.core.utils.SerialProcessor
 import io.getstream.video.android.core.utils.debugOnly
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.User
-import io.getstream.webrtc.EglBase
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
-import io.getstream.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -111,6 +109,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.webrtc.EglBase
+import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import stream.video.sfu.models.ClientCapability
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.WebsocketReconnectStrategy

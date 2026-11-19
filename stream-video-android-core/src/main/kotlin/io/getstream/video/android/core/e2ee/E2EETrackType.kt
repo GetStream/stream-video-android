@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.e2ee
 
-import io.getstream.webrtc.EncryptionManager
+import org.webrtc.EncryptionManager
 import stream.video.sfu.models.TrackType
 
 /**

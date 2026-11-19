@@ -102,11 +102,6 @@ import io.getstream.video.android.core.utils.defaultConstraints
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.stringify
-import io.getstream.webrtc.MediaStreamTrack
-import io.getstream.webrtc.PeerConnection
-import io.getstream.webrtc.RTCStatsReport
-import io.getstream.webrtc.RtpTransceiver.RtpTransceiverDirection
-import io.getstream.webrtc.SessionDescription
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -134,6 +129,11 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.json.JSONArray
+import org.webrtc.MediaStreamTrack
+import org.webrtc.PeerConnection
+import org.webrtc.RTCStatsReport
+import org.webrtc.RtpTransceiver.RtpTransceiverDirection
+import org.webrtc.SessionDescription
 import stream.video.sfu.event.JoinRequest
 import stream.video.sfu.event.LeaveCallRequest
 import stream.video.sfu.event.ReconnectDetails
@@ -556,7 +556,7 @@ public open class RtcSession internal constructor(
         val audio = publisher.value?.publishStream(
             streamId,
             TrackType.TRACK_TYPE_AUDIO,
-        ).asPublishedOrNull<io.getstream.webrtc.AudioTrack>(TrackType.TRACK_TYPE_AUDIO) ?: return
+        ).asPublishedOrNull<org.webrtc.AudioTrack>(TrackType.TRACK_TYPE_AUDIO) ?: return
 
         setMuteState(isEnabled = true, TrackType.TRACK_TYPE_AUDIO)
         setLocalTrack(
@@ -1220,7 +1220,7 @@ public open class RtcSession internal constructor(
                             streamId,
                             TrackType.TRACK_TYPE_VIDEO,
                             call.mediaManager.camera.resolution.value,
-                        ).asPublishedOrNull<io.getstream.webrtc.VideoTrack>(TrackType.TRACK_TYPE_VIDEO)
+                        ).asPublishedOrNull<org.webrtc.VideoTrack>(TrackType.TRACK_TYPE_VIDEO)
                             ?: return@collectLatest
 
                         setMuteState(isEnabled = true, TrackType.TRACK_TYPE_VIDEO)
@@ -1266,7 +1266,7 @@ public open class RtcSession internal constructor(
                         val video = publisher.value?.publishStream(
                             streamId,
                             TrackType.TRACK_TYPE_SCREEN_SHARE,
-                        ).asPublishedOrNull<io.getstream.webrtc.VideoTrack>(
+                        ).asPublishedOrNull<org.webrtc.VideoTrack>(
                             TrackType.TRACK_TYPE_SCREEN_SHARE,
                         ) ?: return@collectLatest
 

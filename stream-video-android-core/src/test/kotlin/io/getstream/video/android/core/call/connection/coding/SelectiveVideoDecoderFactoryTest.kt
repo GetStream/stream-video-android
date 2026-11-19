@@ -17,10 +17,6 @@
 package io.getstream.video.android.core.call.connection.coding
 
 import androidx.core.content.ContextCompat
-import io.getstream.webrtc.SoftwareVideoDecoderFactory
-import io.getstream.webrtc.VideoCodecInfo
-import io.getstream.webrtc.VideoDecoder
-import io.getstream.webrtc.WrappedVideoDecoderFactory
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -32,6 +28,10 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.webrtc.SoftwareVideoDecoderFactory
+import org.webrtc.VideoCodecInfo
+import org.webrtc.VideoDecoder
+import org.webrtc.WrappedVideoDecoderFactory
 
 @RunWith(RobolectricTestRunner::class)
 class SelectiveVideoDecoderFactoryTest {

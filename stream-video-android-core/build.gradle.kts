@@ -22,6 +22,7 @@ plugins {
     id("io.getstream.video.generateServices")
     id(libs.plugins.kotlin.serialization.get().pluginId)
     id(libs.plugins.kotlin.parcelize.get().pluginId)
+    id(libs.plugins.ksp.get().pluginId)
     id(libs.plugins.wire.get().pluginId)
 }
 
@@ -157,7 +158,8 @@ baselineProfile {
         include("io.getstream.video.android.model.**")
         include("io.getstream.android.video.api.generated.**")
         include("io.getstream.android.video.internal.generated.**")
-        include("io.getstream.webrtc.**")
+        include("io.getstream.webrtc.android.**")
+        include("org.webrtc.**")
     }
 }
 
@@ -193,7 +195,7 @@ dependencies {
     implementation(libs.ituDate)
 
     implementation(libs.moshi)
-    implementation(libs.moshi.kotlin)
+    ksp(libs.moshi.kotlin.codegen)
     implementation(libs.moshi.adapters)
 
     // stable marker annotations

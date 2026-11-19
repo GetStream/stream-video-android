@@ -61,11 +61,11 @@ import io.getstream.video.android.notification.PausePlayMediaSessionCallback
 import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.ui.common.StreamCallActivityConfiguration
 import io.getstream.video.android.util.config.AppConfig
-import io.getstream.webrtc.Logging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
+import org.webrtc.Logging
 
 public enum class InitializedState {
     NOT_STARTED, RUNNING, FINISHED, FAILED

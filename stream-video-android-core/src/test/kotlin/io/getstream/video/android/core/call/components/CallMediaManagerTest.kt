@@ -26,8 +26,6 @@ import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
-import io.getstream.webrtc.ManagedAudioProcessingFactory
-import io.getstream.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -38,6 +36,8 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.webrtc.ManagedAudioProcessingFactory
+import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import stream.video.sfu.models.AudioBitrateProfile
 
 /**

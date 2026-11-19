@@ -25,6 +25,7 @@ package io.getstream.android.video.api.generated.models
 
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
@@ -33,6 +34,7 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent to call members who did not accept/reject/join the call to notify they missed the call
  */
+@JsonClass(generateAdapter = true)
 public data class CallMissedEvent (
     @Json(name = "call_cid")
     public val callCid: String,

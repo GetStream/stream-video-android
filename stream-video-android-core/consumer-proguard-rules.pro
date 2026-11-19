@@ -5,11 +5,12 @@
 
 -keep class com.squareup.moshi.JsonReader
 -keep class com.squareup.moshi.JsonAdapter
--keep class kotlin.reflect.jvm.internal.* { *; }
 
+# Video parses JSON through Moshi codegen adapters. It does not ship kotlin-reflect.
 ## Moshi model classes
--keep class io.getstream.android.video.api.generated.** { *; }
--keep class io.getstream.android.video.internal.generated.** { *; }
+# Generated models use @JsonClass(generateAdapter = true). Moshi loads
+# ClassNameJsonAdapter by name, and its own rules keep those adapters.
+# Do not keep the model package; that retain was only for reflection.
 
 ## Kotlin serialized classes
 # kotlinx-serialization already keeps its generated serializers. This rule only
@@ -73,8 +74,3 @@
 -keep class io.getstream.android.push.delegate.PushDelegate { *; }
 -keep class io.getstream.android.push.delegate.AndroidPushDelegateProvider { *; }
 -keep class io.getstream.android.push.permissions.PushPermissionsInitializer { *; }
-
-# Consumer ProGuard rules for io.getstream.webrtc (repackaged WebRTC)
--keep class io.getstream.webrtc.** { *; }
-# Keep the jni_zero library (required by modern WebRTC)
--keep class org.jni_zero.** { *; }

@@ -192,10 +192,10 @@ class CallActivity : ComposeStreamCallActivity() {
             Log.e(E2EE_TAG, "Could not derive the E2EE key from the link", it)
             return
         }
-        // EncryptionManager's JNI is registered by the repackaged WebRTC library's JNI_OnLoad. The
+        // EncryptionManager's JNI is registered by libjingle_peerconnection_so's JNI_OnLoad. The
         // lobby gets that for free from its camera preview, but a scanned link joins without ever
         // building a factory first, so without this create() fails with an UnsatisfiedLinkError.
-        runCatching { System.loadLibrary("stream_jingle_peerconnection_so") }.onFailure {
+        runCatching { System.loadLibrary("jingle_peerconnection_so") }.onFailure {
             Log.e(E2EE_TAG, "Could not load the WebRTC native library", it)
             return
         }

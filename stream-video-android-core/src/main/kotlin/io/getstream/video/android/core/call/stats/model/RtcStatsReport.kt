@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.call.stats.model
 
 import io.getstream.video.android.core.call.stats.model.discriminator.RtcReportType
-import io.getstream.webrtc.RTCStatsReport
+import org.webrtc.RTCStatsReport
 
 data class RtcStatsReport(
     val origin: RTCStatsReport,

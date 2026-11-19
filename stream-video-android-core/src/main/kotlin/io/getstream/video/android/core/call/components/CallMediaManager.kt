@@ -31,13 +31,13 @@ import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
-import io.getstream.webrtc.EglBase
-import io.getstream.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import org.webrtc.EglBase
+import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 
 /**
  * Owns the media pipeline for a call: the [StreamPeerConnectionFactory] lifecycle, the
@@ -328,7 +328,7 @@ internal class CallMediaManager(
     /**
      * Whether a noise-cancellation processor is wired into this call's native factory at all, so
      * "refused to change" can be told from "there is no processor". Without it, a call configured
-     * with no [io.getstream.webrtc.ManagedAudioProcessingFactory] looks like a failure every time.
+     * with no [org.webrtc.ManagedAudioProcessingFactory] looks like a failure every time.
      */
     fun isAudioProcessingReachable(): Boolean =
         _peerConnectionFactory?.hasAudioProcessingAttached() ?: false

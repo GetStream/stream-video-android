@@ -23,7 +23,6 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Moshi.Builder
 import com.squareup.moshi.ToJson
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.getstream.android.video.api.generated.models.VideoEventAdapter
 import io.getstream.android.video.internal.generated.infrastructure.BigDecimalAdapter
 import io.getstream.android.video.internal.generated.infrastructure.BigIntegerAdapter
@@ -137,7 +136,7 @@ internal class MoshiVideoParser : VideoParser {
                 lenientAdapter(
                     io.getstream.android.video.api.generated.models.TranscriptionSettingsResponse.Language.LanguageAdapter(),
                 ),
-            ).addLast(KotlinJsonAdapterFactory()).build()
+            ).build()
     }
 
     private inline fun <reified T> Moshi.Builder.addAdapter(adapter: JsonAdapter<T>) = apply {

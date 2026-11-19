@@ -18,9 +18,6 @@ package io.getstream.video.android.core
 
 import android.content.Context
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
-import io.getstream.webrtc.AudioSource
-import io.getstream.webrtc.AudioTrack
-import io.getstream.webrtc.EglBase
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -30,6 +27,9 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.webrtc.AudioSource
+import org.webrtc.AudioTrack
+import org.webrtc.EglBase
 
 /**
  * Covers [MediaManagerImpl.replaceAudioSourceAndTrack] — the swap that lets audio-source

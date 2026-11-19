@@ -42,11 +42,11 @@ public sealed class MediaTrack(
 @Stable
 public data class VideoTrack(
     public override val streamId: String,
-    public val video: io.getstream.webrtc.VideoTrack,
+    public val video: org.webrtc.VideoTrack,
 ) : MediaTrack(streamId)
 
 @Stable
 public data class AudioTrack(
     public override val streamId: String,
-    public val audio: io.getstream.webrtc.AudioTrack,
+    public val audio: org.webrtc.AudioTrack,
 ) : MediaTrack(streamId)

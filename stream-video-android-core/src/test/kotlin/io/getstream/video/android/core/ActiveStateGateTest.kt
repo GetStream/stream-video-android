@@ -18,7 +18,6 @@ package io.getstream.video.android.core
 
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.connection.Publisher
-import io.getstream.webrtc.PeerConnection
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.just
@@ -39,6 +38,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
+import org.webrtc.PeerConnection
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.test.Test
 import kotlin.test.assertEquals

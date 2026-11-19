@@ -17,13 +17,13 @@
 package io.getstream.video.android.core.call.components
 
 import io.getstream.log.taggedLogger
-import io.getstream.webrtc.PeerConnection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.webrtc.PeerConnection
 
 /**
  * Watches the publisher and subscriber peer-connection ICE states for a call and

@@ -20,8 +20,8 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
-import io.getstream.webrtc.SdpObserver
-import io.getstream.webrtc.SessionDescription
+import org.webrtc.SdpObserver
+import org.webrtc.SessionDescription
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 

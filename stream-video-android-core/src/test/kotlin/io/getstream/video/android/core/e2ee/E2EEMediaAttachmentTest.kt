@@ -25,14 +25,6 @@ import io.getstream.video.android.core.call.connection.transceivers.TransceiverC
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.trace.Tracer
-import io.getstream.webrtc.MediaConstraints
-import io.getstream.webrtc.MediaStream
-import io.getstream.webrtc.MediaStreamTrack
-import io.getstream.webrtc.PeerConnection
-import io.getstream.webrtc.RtpReceiver
-import io.getstream.webrtc.RtpSender
-import io.getstream.webrtc.RtpTransceiver
-import io.getstream.webrtc.SessionDescription
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -49,6 +41,14 @@ import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.robolectric.shadows.ShadowTrace.setEnabled
+import org.webrtc.MediaConstraints
+import org.webrtc.MediaStream
+import org.webrtc.MediaStreamTrack
+import org.webrtc.PeerConnection
+import org.webrtc.RtpReceiver
+import org.webrtc.RtpSender
+import org.webrtc.RtpTransceiver
+import org.webrtc.SessionDescription
 import stream.video.sfu.models.AudioBitrateProfile
 import stream.video.sfu.models.Codec
 import stream.video.sfu.models.PublishOption
@@ -253,10 +253,10 @@ class E2EEMediaAttachmentTest {
 
         override fun getId(): String = mockedId
 
-        override fun addTrack(track: io.getstream.webrtc.AudioTrack?): Boolean {
+        override fun addTrack(track: org.webrtc.AudioTrack?): Boolean {
             val field = MediaStream::class.java.getDeclaredField("audioTracks")
             field.isAccessible = true
-            (field.get(this) as MutableList<io.getstream.webrtc.AudioTrack>).add(track!!)
+            (field.get(this) as MutableList<org.webrtc.AudioTrack>).add(track!!)
             return true
         }
     }
@@ -300,7 +300,7 @@ class E2EEMediaAttachmentTest {
     private fun audioStreamFor(prefix: String, trackId: String): MockMediaStream {
         val stream = MockMediaStream("$prefix:${TrackType.TRACK_TYPE_AUDIO.value}", 1)
         stream.addTrack(
-            mockk<io.getstream.webrtc.AudioTrack>(
+            mockk<org.webrtc.AudioTrack>(
                 relaxed = true,
             ) { every { id() } returns trackId },
         )

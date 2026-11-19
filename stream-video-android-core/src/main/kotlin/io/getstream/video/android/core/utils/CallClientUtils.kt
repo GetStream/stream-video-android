@@ -20,9 +20,9 @@ import android.media.AudioManager
 import android.media.MediaRecorder
 import android.os.Build
 import io.getstream.video.android.core.model.IceServer
-import io.getstream.webrtc.MediaConstraints
-import io.getstream.webrtc.PeerConnection
-import io.getstream.webrtc.SessionDescription
+import org.webrtc.MediaConstraints
+import org.webrtc.PeerConnection
+import org.webrtc.SessionDescription
 import stream.video.sfu.models.AudioBitrateProfile
 
 data class RtpMapAttribute(val index: Int, val number: String, val codec: String, val line: String)
@@ -304,7 +304,7 @@ internal fun buildAudioConstraints(
 /**
  * Builds the audio-source constraints with WebRTC's software audio processing explicitly on or off.
  *
- * These are fixed when the [io.getstream.webrtc.AudioSource] is created, so changing them means building a
+ * These are fixed when the [org.webrtc.AudioSource] is created, so changing them means building a
  * new source and swapping the published track.
  */
 @JvmSynthetic

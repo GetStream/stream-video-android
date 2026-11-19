@@ -25,6 +25,7 @@ package io.getstream.android.video.api.generated.models
 
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
@@ -33,6 +34,7 @@ import com.squareup.moshi.ToJson
 /**
  * A recurring quiet-hours schedule: while any quiet window is active, push notifications for the user are suppressed. Suppressed notifications are dropped, not delayed.
  */
+@JsonClass(generateAdapter = true)
 public data class PushScheduleResponse (
     @Json(name = "timezone")
     public val timezone: String,

@@ -25,6 +25,7 @@ package io.getstream.android.video.api.generated.models
 
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
@@ -33,6 +34,7 @@ import com.squareup.moshi.ToJson
 /**
  * Reports a batch of client-side telemetry events. Each event is validated and processed independently; one invalid event does not block the rest of the batch.
  */
+@JsonClass(generateAdapter = true)
 public data class ReportClientEventRequest (
     @Json(name = "events")
     public val events: List<io.getstream.android.video.api.generated.models.ClientEvent> = emptyList()

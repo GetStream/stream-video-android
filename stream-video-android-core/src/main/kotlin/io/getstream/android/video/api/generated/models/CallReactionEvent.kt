@@ -25,6 +25,7 @@ package io.getstream.android.video.api.generated.models
 
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
@@ -33,6 +34,7 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when a reaction is sent in a call, clients should use this to show the reaction in the call screen
  */
+@JsonClass(generateAdapter = true)
 public data class CallReactionEvent (
     @Json(name = "call_cid")
     public val callCid: String,
