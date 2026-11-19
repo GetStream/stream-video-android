@@ -19,7 +19,6 @@ package io.getstream.video.android.hls
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import android.os.SystemClock
 import android.view.SurfaceView
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -61,11 +60,6 @@ internal class ExoHlsPlayer(
     override val playlistUrl: String,
 ) : HlsPlayer {
 
-    private companion object {
-        /** A pause longer than this resumes at the live edge instead of where playback stopped. */
-        const val RESUME_AT_LIVE_EDGE_AFTER_MS = 10_000L
-    }
-
     private val mainHandler = Handler(Looper.getMainLooper())
 
     private val _videoAspectRatio = MutableStateFlow<Float?>(null)
@@ -75,7 +69,6 @@ internal class ExoHlsPlayer(
     private var player: ExoPlayer? = null
     private var surface: SurfaceView? = null
     private var audioEnabled = true
-    private var pausedAt: Long? = null
     private var released = false
 
     internal val exoPlayer: ExoPlayer? get() = player
@@ -88,11 +81,6 @@ internal class ExoHlsPlayer(
             player.setVideoSurfaceView(surfaceView)
             surface = surfaceView
         }
-        val pausedFor = pausedAt?.let { SystemClock.elapsedRealtime() - it }
-        if (pausedFor != null && pausedFor > RESUME_AT_LIVE_EDGE_AFTER_MS && player.isCurrentMediaItemLive) {
-            player.seekToDefaultPosition()
-        }
-        pausedAt = null
         player.play()
     }
 
@@ -102,7 +90,6 @@ internal class ExoHlsPlayer(
         player.pause()
         player.clearVideoSurfaceView(surfaceView)
         surface = null
-        pausedAt = SystemClock.elapsedRealtime()
     }
 
     override fun setAudioEnabled(enabled: Boolean) {
