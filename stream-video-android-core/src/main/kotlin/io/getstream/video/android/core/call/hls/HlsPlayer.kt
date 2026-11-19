@@ -26,8 +26,9 @@ import kotlinx.coroutines.flow.StateFlow
  * Plays the HLS broadcast of one [Call].
  *
  * The call owns its player: one is created when the backend serves the call as HLS, and it is
- * released when the call is left. A renderer only shows and hides it with [attach] and [detach],
- * so a renderer that is recreated, for example on rotation, resumes the same player.
+ * released when the call is left. A renderer only shows and hides the video with [attach] and
+ * [detach]. Playback, including audio, continues while no renderer is shown, the same as a WebRTC
+ * call, and a renderer that is recreated, for example on rotation, shows the same player.
  *
  * The player draws to one surface at a time: showing the same call in two renderers at once is
  * not supported.
@@ -44,12 +45,12 @@ public interface HlsPlayer {
      */
     public val videoAspectRatio: StateFlow<Float?>
 
-    /** Draws the broadcast on [surfaceView] and plays it. Main thread only. */
+    /** Draws the broadcast on [surfaceView], starting playback if needed. Main thread only. */
     public fun attach(surfaceView: SurfaceView)
 
     /**
-     * Stops drawing on [surfaceView] and pauses. The player keeps its buffer, so a later [attach]
-     * resumes without loading the stream again. Main thread only.
+     * Stops drawing on [surfaceView]. Playback continues until [release]. Ignored if another
+     * surface was attached since. Main thread only.
      */
     public fun detach(surfaceView: SurfaceView)
 
