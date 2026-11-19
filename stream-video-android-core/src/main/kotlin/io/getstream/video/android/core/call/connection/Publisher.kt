@@ -626,7 +626,10 @@ internal class Publisher(
         for (item in transceiverCache.items()) {
             if (item.publishOption.track_type != trackType) continue
             val track = item.transceiver.sender.track() ?: continue
-            if (track.state() == MediaStreamTrack.State.LIVE && track.enabled()) return true
+            // enabled() is the publish intent. state() goes ENDED while the capturer restarts
+            // and is not a mute, so a ChangePublishOptions event in that window must still
+            // attach a new option. iOS gates the same update on primaryTrack.isEnabled.
+            if (track.enabled()) return true
         }
         return false
     }
@@ -815,7 +818,6 @@ internal class Publisher(
             format?.toVideoDimension() ?: publishOption.video_dimension
                 ?: defaultFormat.toVideoDimension()
         }
-        val isTrackLive = track.state() == MediaStreamTrack.State.LIVE
         val isAudio = isAudioTrackType(publishOption.track_type)
         // Layer math only needs dimension + PublishOption — not LIVE/frames. Previously we skipped
         // computeLayers when !LIVE, announced empty layers, and SFU rejected SetPublisher on first
@@ -837,7 +839,7 @@ internal class Publisher(
             track_type = publishOption.track_type,
             mid = extractMid(transceiver, transceiverCache.indexOf(publishOption), sdp),
             stereo = false,
-            muted = !isTrackLive,
+            muted = !track.enabled(),
             codec = publishOption.codec,
             publish_option_id = publishOption.id,
         )

@@ -107,8 +107,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -414,7 +412,6 @@ public class Call(
         apiClient = apiClient,
         state = state,
         callAnalytics = callAnalytics,
-        statsReporter = statsReporter,
         sessionMonitor = { sessionMonitor },
         type = type,
         id = id,
@@ -724,8 +721,6 @@ public class Call(
     }
 
     // endregion
-
-    internal suspend fun collectStats(): CallStatsReport = statsReporter.collectStats()
 
     // region Reconnection — unified loop
 
@@ -1140,10 +1135,10 @@ public class Call(
      * Whether the server permits noise cancellation for this call, per the capability granted to
      * the user and the call type's noise-cancellation mode.
      */
-    private fun isNoiseCancellationAllowed(): Boolean = noiseCancellationPolicy.isAllowed(
-        capabilities = state.ownCapabilities.value,
-        settings = state.settings.value,
-    )
+    private fun isNoiseCancellationAllowed(): Boolean {
+        val (settings, capabilities) = state.settingsAndCapabilities()
+        return noiseCancellationPolicy.isAllowed(capabilities = capabilities, settings = settings)
+    }
 
     /**
      * Publishes the state observers should see: what the call asked for while no factory exists,
@@ -1163,40 +1158,35 @@ public class Call(
      */
     private fun observeNoiseCancellationPolicy() {
         scope.launch {
-            state.settings
-                .filterNotNull()
-                .combine(
-                    state.ownCapabilities,
-                ) { _, _ -> }
-                .collect {
-                    // combine collects each upstream on its own coroutine, so the pair it hands
-                    // over can be stale — new settings next to the capabilities from before them.
-                    // Deciding on that would withdraw noise cancellation the server just granted.
-                    val settings = state.settings.value
-                    val capabilities = state.ownCapabilities.value
-                    if (!noiseCancellationPolicy.isAllowed(capabilities, settings)) {
-                        // Withdraws unconditionally rather than only when something is already
-                        // processing: a state wanted before the factory existed is remembered and
-                        // would otherwise be applied the moment one is built, after the server
-                        // had withheld it.
-                        val wasProcessing = media.isAudioProcessingEnabledIfCreated()
-                        if (wasProcessing || media.isAudioProcessingWanted()) {
-                            logger.i {
-                                "[noiseCancellation] withdrawing, no longer allowed for this call"
-                            }
-                            media.setAudioProcessingEnabled(false)
-                            publishAudioProcessingState()
-                            notifyNoiseCancellationState(false)
+            state.serverSnapshot.collect { snapshot ->
+                // Wait until a response has published settings. Deciding on the live fields here
+                // would run inside one of their writes whenever this collector and the writer
+                // share a thread.
+                val settings = snapshot.settings ?: return@collect
+                val capabilities = snapshot.capabilities
+                if (!noiseCancellationPolicy.isAllowed(capabilities, settings)) {
+                    // Withdraws unconditionally rather than only when something is already
+                    // processing: a state wanted before the factory existed is remembered and
+                    // would otherwise be applied the moment one is built, after the server
+                    // had withheld it.
+                    val wasProcessing = media.isAudioProcessingEnabledIfCreated()
+                    if (wasProcessing || media.isAudioProcessingWanted()) {
+                        logger.i {
+                            "[noiseCancellation] withdrawing, no longer allowed for this call"
                         }
-                        return@collect
+                        media.setAudioProcessingEnabled(false)
+                        publishAudioProcessingState()
+                        notifyNoiseCancellationState(false)
                     }
-                    if (!autoOnApplied) {
-                        autoOnApplied = true
-                        if (noiseCancellationPolicy.isAutoOn(capabilities, settings)) {
-                            setAudioProcessingEnabled(true)
-                        }
+                    return@collect
+                }
+                if (!autoOnApplied) {
+                    autoOnApplied = true
+                    if (noiseCancellationPolicy.isAutoOn(capabilities, settings)) {
+                        setAudioProcessingEnabled(true)
                     }
                 }
+            }
         }
     }
 

@@ -156,6 +156,7 @@ internal fun CallState.injectServerState(
 ) {
     capabilities?.let { mutableStateField<List<OwnCapability>>("_ownCapabilities").value = it }
     settings?.let { mutableStateField<CallSettingsResponse?>("_settings").value = it }
+    publishServerSnapshot()
 }
 
 /**

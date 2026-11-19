@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.call.components
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.video.android.core.call.EmptyRtcSession
 import io.getstream.video.android.core.call.RtcSession
 import io.mockk.mockk
 import org.junit.Test
@@ -37,6 +38,22 @@ class CallSessionManagerTest {
         val session = mockk<RtcSession>(relaxed = true)
         manager.setActiveSession(session)
 
+        assertThat(manager.session.value).isSameInstanceAs(session)
+
+        manager.setActiveSession(null)
+        assertThat(manager.session.value).isNull()
+    }
+
+    @Test
+    fun `setActiveSession rejects an EmptyRtcSession and keeps the current session`() {
+        val manager = manager()
+
+        manager.setActiveSession(mockk<EmptyRtcSession>(relaxed = true))
+        assertThat(manager.session.value).isNull()
+
+        val session = mockk<RtcSession>(relaxed = true)
+        manager.setActiveSession(session)
+        manager.setActiveSession(mockk<EmptyRtcSession>(relaxed = true))
         assertThat(manager.session.value).isSameInstanceAs(session)
 
         manager.setActiveSession(null)

@@ -100,6 +100,7 @@ import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.filter.Filters
 import io.getstream.video.android.core.filter.toMap
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
+import io.getstream.video.android.core.internal.module.restoreCoordinatorRequestContextFromCause
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.MuteUsersData
@@ -172,6 +173,7 @@ import okhttp3.Callback
 import okhttp3.Request
 import okhttp3.Response
 import retrofit2.HttpException
+import java.io.IOException
 import java.util.*
 
 internal const val WAIT_FOR_CONNECTION_ID_TIMEOUT = 5000L
@@ -402,6 +404,8 @@ internal class StreamVideoClient internal constructor(
             } else {
                 throw e
             }
+        } catch (e: IOException) {
+            throw e.restoreCoordinatorRequestContextFromCause()
         }
     }
 

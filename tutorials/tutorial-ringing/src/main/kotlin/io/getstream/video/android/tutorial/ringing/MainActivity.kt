@@ -21,6 +21,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -73,6 +74,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import org.json.JSONException
+import java.io.IOException
 import java.util.UUID
 
 /**
@@ -91,11 +94,21 @@ class MainActivity : ComponentActivity() {
                 var selectedUser by remember { mutableStateOf(RingingApp.currentUser) }
                 when (selectedUser) {
                     null -> LoginScreen(onUserSelected = { user ->
-                        RingingApp.login(applicationContext, user)
-                        // For the simplicity of the tutorial, we are requesting the required permissions here.
-                        // In a real app, you should request the permissions when needed.
-                        resultLauncher.requestDefaultPermissions()
-                        selectedUser = user
+                        lifecycleScope.launch {
+                            try {
+                                RingingApp.login(applicationContext, user)
+                            } catch (e: IOException) {
+                                Log.e("MainActivity", "Login failed", e)
+                                return@launch
+                            } catch (e: JSONException) {
+                                Log.e("MainActivity", "Login failed", e)
+                                return@launch
+                            }
+                            // For the simplicity of the tutorial, we are requesting the required permissions here.
+                            // In a real app, you should request the permissions when needed.
+                            resultLauncher.requestDefaultPermissions()
+                            selectedUser = user
+                        }
                     })
 
                     else -> HomeScreen(

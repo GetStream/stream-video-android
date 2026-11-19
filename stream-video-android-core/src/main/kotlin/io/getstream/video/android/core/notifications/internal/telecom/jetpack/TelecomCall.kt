@@ -20,12 +20,14 @@ import android.os.ParcelUuid
 import android.telecom.DisconnectCause
 import androidx.core.telecom.CallAttributesCompat
 import androidx.core.telecom.CallEndpointCompat
+import io.getstream.log.taggedLogger
 import kotlinx.coroutines.channels.Channel
 
 /**
  * Custom representation of a call state.
  */
 internal sealed class TelecomCall {
+    val logger by taggedLogger("TelecomCall")
 
     /**
      * There is no current or past calls in the stack
@@ -59,7 +61,9 @@ internal sealed class TelecomCall {
          * @return true if the action was sent, false otherwise
          */
         fun processAction(action: TelecomCallAction): Boolean {
-            return actionSource.trySend(action).isSuccess
+            val result = actionSource.trySend(action).isSuccess
+            logger.d { "[processAction] action:$action, result = $result" }
+            return result
         }
     }
 

@@ -137,9 +137,7 @@ internal class MoshiVideoParser : VideoParser {
                 lenientAdapter(
                     io.getstream.android.video.api.generated.models.TranscriptionSettingsResponse.Language.LanguageAdapter(),
                 ),
-            )
-            // Factories
-            .addLast(KotlinJsonAdapterFactory()).build()
+            ).addLast(KotlinJsonAdapterFactory()).build()
     }
 
     private inline fun <reified T> Moshi.Builder.addAdapter(adapter: JsonAdapter<T>) = apply {

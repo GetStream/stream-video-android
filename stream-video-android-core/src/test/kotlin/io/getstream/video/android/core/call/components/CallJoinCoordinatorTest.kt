@@ -161,6 +161,20 @@ class CallJoinCoordinatorTest {
     }
 
     @Test
+    fun `join restores the full rejoin budget`() = runTest(testDispatcher) {
+        val rejoinRateLimiter = RejoinRateLimiter()
+        repeat(RejoinRateLimiter.MAX_ATTEMPTS) { rejoinRateLimiter.tryRegister() }
+        every { sessionManager.rejoinRateLimiter } returns rejoinRateLimiter
+        stubJoinCall(Success(mockJoinResponse))
+        coEvery { mockSession.connectInternal() } returns SfuConnectionResult.Success
+
+        coordinator().join()
+        advanceUntilIdle()
+
+        assertThat(rejoinRateLimiter.tryRegister()).isTrue()
+    }
+
+    @Test
     fun `first join passes e2ee from call state`() = runTest(testDispatcher) {
         every { state.e2eeEnabled } returns MutableStateFlow(true)
         stubJoinCall(Success(mockJoinResponse))

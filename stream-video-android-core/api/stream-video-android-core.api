@@ -10691,19 +10691,19 @@ public final class io/getstream/video/android/core/call/CallType$Livestream : io
 	public fun getSortPreset ()Lio/getstream/video/android/core/sorting/SortPreset;
 }
 
-public final class io/getstream/video/android/core/call/RtcSession {
+public class io/getstream/video/android/core/call/RtcSession {
 	public final fun cleanup ()V
-	public final fun getPublisherStats (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getPublisherStats (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getSfuSocketState ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getSubscriberStats (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun handleEvent (Lio/getstream/android/video/api/generated/models/VideoEvent;)V
-	public final fun handleIceTrickle (Lio/getstream/video/android/core/events/ICETrickleEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun handleSubscriberOffer (Lio/getstream/video/android/core/events/SubscriberOfferEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun reconnect (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun requestPublisherIceRestart (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun requestSubscriberIceRestart (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun setScreenShareTrack ()V
-	public final fun updateTrackDimensions (Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZLstream/video/sfu/models/VideoDimension;Ljava/lang/String;)V
+	public fun getSubscriberStats (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun handleEvent (Lio/getstream/android/video/api/generated/models/VideoEvent;)V
+	public fun handleIceTrickle (Lio/getstream/video/android/core/events/ICETrickleEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun handleSubscriberOffer (Lio/getstream/video/android/core/events/SubscriberOfferEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun reconnect (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun requestPublisherIceRestart (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun requestSubscriberIceRestart (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun setScreenShareTrack ()V
+	public fun updateTrackDimensions (Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZLstream/video/sfu/models/VideoDimension;Ljava/lang/String;)V
 	public static synthetic fun updateTrackDimensions$default (Lio/getstream/video/android/core/call/RtcSession;Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZLstream/video/sfu/models/VideoDimension;Ljava/lang/String;ILjava/lang/Object;)V
 }
 
@@ -19032,28 +19032,22 @@ public final class stream/video/sfu/signal/SendStatsRequest : com/squareup/wire/
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/sfu/signal/SendStatsRequest$Companion;
 	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/InputDevices;Lstream/video/sfu/models/InputDevices;Lstream/video/sfu/models/AndroidState;Lstream/video/sfu/models/AppleState;Lstream/video/sfu/signal/Telemetry;Lstream/video/sfu/models/RTMPIngress;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Lokio/ByteString;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/InputDevices;Lstream/video/sfu/models/InputDevices;Lstream/video/sfu/models/AndroidState;Lstream/video/sfu/models/AppleState;Lstream/video/sfu/signal/Telemetry;Lstream/video/sfu/models/RTMPIngress;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/InputDevices;Lstream/video/sfu/models/InputDevices;Lstream/video/sfu/models/AndroidState;Lstream/video/sfu/models/AppleState;Lstream/video/sfu/signal/Telemetry;Lstream/video/sfu/models/RTMPIngress;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Lokio/ByteString;)Lstream/video/sfu/signal/SendStatsRequest;
-	public static synthetic fun copy$default (Lstream/video/sfu/signal/SendStatsRequest;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/InputDevices;Lstream/video/sfu/models/InputDevices;Lstream/video/sfu/models/AndroidState;Lstream/video/sfu/models/AppleState;Lstream/video/sfu/signal/Telemetry;Lstream/video/sfu/models/RTMPIngress;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/signal/SendStatsRequest;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/AndroidState;Lstream/video/sfu/models/AppleState;Lstream/video/sfu/signal/Telemetry;Lstream/video/sfu/models/RTMPIngress;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/AndroidState;Lstream/video/sfu/models/AppleState;Lstream/video/sfu/signal/Telemetry;Lstream/video/sfu/models/RTMPIngress;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/AndroidState;Lstream/video/sfu/models/AppleState;Lstream/video/sfu/signal/Telemetry;Lstream/video/sfu/models/RTMPIngress;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Lokio/ByteString;)Lstream/video/sfu/signal/SendStatsRequest;
+	public static synthetic fun copy$default (Lstream/video/sfu/signal/SendStatsRequest;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/AndroidState;Lstream/video/sfu/models/AppleState;Lstream/video/sfu/signal/Telemetry;Lstream/video/sfu/models/RTMPIngress;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/signal/SendStatsRequest;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAndroid ()Lstream/video/sfu/models/AndroidState;
 	public final fun getApple ()Lstream/video/sfu/models/AppleState;
-	public final fun getAudio_devices ()Lstream/video/sfu/models/InputDevices;
 	public final fun getDecode_stats ()Ljava/util/List;
 	public final fun getEncode_stats ()Ljava/util/List;
-	public final fun getPublisher_rtc_stats ()Ljava/lang/String;
-	public final fun getPublisher_stats ()Ljava/lang/String;
 	public final fun getRtc_stats ()Ljava/lang/String;
 	public final fun getRtmp ()Lstream/video/sfu/models/RTMPIngress;
 	public final fun getSdk ()Ljava/lang/String;
 	public final fun getSdk_version ()Ljava/lang/String;
 	public final fun getSession_id ()Ljava/lang/String;
-	public final fun getSubscriber_rtc_stats ()Ljava/lang/String;
-	public final fun getSubscriber_stats ()Ljava/lang/String;
 	public final fun getTelemetry ()Lstream/video/sfu/signal/Telemetry;
 	public final fun getUnified_session_id ()Ljava/lang/String;
-	public final fun getVideo_devices ()Lstream/video/sfu/models/InputDevices;
 	public final fun getWebrtc_version ()Ljava/lang/String;
 	public fun hashCode ()I
 	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
