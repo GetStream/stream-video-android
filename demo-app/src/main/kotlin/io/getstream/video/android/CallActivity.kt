@@ -28,6 +28,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.models.Filters
 import io.getstream.chat.android.models.querysort.QuerySortByField
@@ -42,9 +43,11 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.e2ee.E2EEEventType
 import io.getstream.video.android.core.e2ee.StreamEncryptionManager
+import io.getstream.video.android.core.model.PlaybackType
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.ui.call.CallScreen
 import io.getstream.video.android.ui.call.DemoComponentFactory
+import io.getstream.video.android.ui.call.DemoHlsViewerScreen
 import io.getstream.video.android.ui.common.StreamActivityUiDelegate
 import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.ui.common.StreamCallActivityConfiguration
@@ -83,7 +86,7 @@ class CallActivity : ComposeStreamCallActivity() {
         private const val E2EE_TAG = "CallActivityE2EE"
     }
 
-    override val uiDelegate: StreamActivityUiDelegate<StreamCallActivity> = StreamDemoUiDelegate()
+    override val uiDelegate: StreamActivityUiDelegate<StreamCallActivity> = DemoHlsUiDelegate()
     var observeCallReadyToJoinJob: Job? = null
     var observeRingingJob: Job? = null
     private val previousRingingStates = ConcurrentHashMap.newKeySet<RingingState>()
@@ -233,7 +236,35 @@ class CallActivity : ComposeStreamCallActivity() {
         DemoE2eeKeys.remember(call.cid, passphrase, manager)
     }
 
-    private class StreamDemoUiDelegate : StreamCallActivityComposeDelegate() {
+    /**
+     * Shows [DemoHlsViewerScreen] when the call was joined as an HLS viewer, and the regular demo
+     * UI otherwise.
+     */
+    private class DemoHlsUiDelegate : StreamDemoUiDelegate() {
+
+        // Kotlin 1.9 cannot call super on a member extension, so the default root comes from a
+        // delegate that does not override it.
+        private val webRtcDelegate = StreamDemoUiDelegate()
+
+        @StreamCallActivityDelicateApi
+        @Composable
+        override fun StreamCallActivity.RootContent(call: Call) {
+            val playbackType by call.state.playbackType.collectAsStateWithLifecycle()
+            if (playbackType is PlaybackType.Hls) {
+                DemoHlsViewerScreen(
+                    call = call,
+                    onLeave = {
+                        leave(call)
+                        safeFinish()
+                    },
+                )
+            } else {
+                with(webRtcDelegate) { RootContent(call) }
+            }
+        }
+    }
+
+    private open class StreamDemoUiDelegate : StreamCallActivityComposeDelegate() {
 
         override val componentFactory = DemoComponentFactory
 

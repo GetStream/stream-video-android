@@ -50,6 +50,7 @@ import io.getstream.video.android.core.sounds.enableRingingCallVibrationConfig
 import io.getstream.video.android.data.services.stream.GetAuthDataResponse
 import io.getstream.video.android.data.services.stream.StreamService
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
+import io.getstream.video.android.hls.ExoHlsPlayerFactory
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
@@ -506,6 +507,7 @@ object StreamVideoInitHelper {
             telecomConfig = TelecomConfig(context.packageName),
             connectOnInit = false,
             rejectCallWhenBusy = false,
+            hlsPlayerFactory = ExoHlsPlayerFactory(),
         ).apply {
             sfuId?.takeIf { it.isNotBlank() }?.let(::forceSfuId)
         }.build()

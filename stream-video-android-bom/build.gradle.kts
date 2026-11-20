@@ -19,6 +19,7 @@ dependencies {
         api(project(":stream-video-android-ui-xml"))
         api(project(":stream-video-android-ui-compose"))
         api(project(":stream-video-android-filters-video"))
+        api(project(":stream-video-android-hls"))
         api(project(":stream-video-android-previewdata"))
     }
 }
