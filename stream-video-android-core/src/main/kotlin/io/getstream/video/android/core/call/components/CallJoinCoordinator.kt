@@ -392,6 +392,7 @@ internal class CallJoinCoordinator(
         }
 
         sessionManager.nonFastReconnectAttempts = 0
+        sessionManager.rejoinRateLimiter.reset()
         sessionMonitor.cancelSfuObservers()
 
         logger.d {

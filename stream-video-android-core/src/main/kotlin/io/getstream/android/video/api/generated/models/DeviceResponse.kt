@@ -25,6 +25,7 @@ package io.getstream.android.video.api.generated.models
 
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
@@ -33,6 +34,7 @@ import com.squareup.moshi.ToJson
 /**
  * An object representing a device which can receive push notifications.
  */
+@JsonClass(generateAdapter = true)
 public data class DeviceResponse (
     @Json(name = "created_at")
     public val createdAt: kotlin.time.Instant,

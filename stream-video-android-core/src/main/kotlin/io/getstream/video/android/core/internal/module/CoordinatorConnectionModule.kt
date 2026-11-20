@@ -89,7 +89,8 @@ internal class CoordinatorConnectionModule(
                 }.apply {
                     level = loggingLevel.httpLoggingLevel.level
                 },
-            ).retryOnConnectionFailure(true)
+            ).addInterceptor(CoordinatorRequestErrorInterceptor())
+            .retryOnConnectionFailure(true)
             .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
             .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
             .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)

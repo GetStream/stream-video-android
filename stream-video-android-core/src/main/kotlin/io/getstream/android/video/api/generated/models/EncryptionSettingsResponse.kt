@@ -25,6 +25,7 @@ package io.getstream.android.video.api.generated.models
 
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
@@ -33,6 +34,7 @@ import com.squareup.moshi.ToJson
 /**
  * EncryptionSettings is the payload for end-to-end encryption settings
  */
+@JsonClass(generateAdapter = true)
 public data class EncryptionSettingsResponse (
     @Json(name = "mode")
     public val mode: Mode
