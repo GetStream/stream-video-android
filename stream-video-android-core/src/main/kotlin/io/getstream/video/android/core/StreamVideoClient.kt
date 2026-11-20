@@ -50,6 +50,8 @@ import io.getstream.android.video.generated.models.QueryCallMembersResponse
 import io.getstream.android.video.generated.models.QueryCallsRequest
 import io.getstream.android.video.generated.models.RejectCallRequest
 import io.getstream.android.video.generated.models.RejectCallResponse
+import io.getstream.android.video.generated.models.ReportHLSStatsRequest
+import io.getstream.android.video.generated.models.ReportHLSStatsResponse
 import io.getstream.android.video.generated.models.RequestPermissionRequest
 import io.getstream.android.video.generated.models.RingCallRequest
 import io.getstream.android.video.generated.models.RingCallResponse
@@ -868,6 +870,7 @@ internal class StreamVideoClient internal constructor(
         hintHighScaleLivestreamPublisher: Boolean? = null,
         e2ee: Boolean? = null,
         playbackCapabilities: List<String>? = null,
+        unifiedSessionId: String? = null,
     ): Result<JoinCallResponse> {
         val joinCallRequest = JoinCallRequest(
             create = create,
@@ -886,6 +889,7 @@ internal class StreamVideoClient internal constructor(
             migratingFromList = migratingFromList,
             hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
             playbackCapabilities = playbackCapabilities,
+            unifiedSessionId = unifiedSessionId,
         )
 
         val result = apiCall {
@@ -897,6 +901,18 @@ internal class StreamVideoClient internal constructor(
             )
         }
         return result
+    }
+
+    suspend fun reportHlsStats(
+        type: String,
+        id: String,
+        request: ReportHLSStatsRequest,
+    ): Result<ReportHLSStatsResponse> = apiCall {
+        coordinatorConnectionModule.api.reportHLSStats(
+            type = type,
+            id = id,
+            reportHLSStatsRequest = request,
+        )
     }
 
     suspend fun updateMembers(

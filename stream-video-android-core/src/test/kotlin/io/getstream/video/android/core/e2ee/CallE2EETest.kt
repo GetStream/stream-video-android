@@ -98,6 +98,7 @@ class CallE2EETest {
             mockClientImpl.joinCall(
                 any(), any(), any(), any(), any(), any(), any(), any(),
                 any(), any(), any(), any(), any(), any(), any(), any(),
+                any(),
             )
         } returns Result.Failure(Error.GenericError("not under test"))
 
@@ -197,6 +198,7 @@ class CallE2EETest {
                 hintHighScaleLivestreamPublisher = any(),
                 e2ee = true,
                 playbackCapabilities = any(),
+                unifiedSessionId = any(),
             )
         }
     }
@@ -226,6 +228,7 @@ class CallE2EETest {
                 hintHighScaleLivestreamPublisher = any(),
                 e2ee = false,
                 playbackCapabilities = any(),
+                unifiedSessionId = any(),
             )
         }
     }

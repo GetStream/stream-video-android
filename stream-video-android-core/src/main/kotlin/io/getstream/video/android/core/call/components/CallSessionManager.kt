@@ -20,6 +20,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.EmptyRtcSession
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.hls.HlsPlayer
+import io.getstream.video.android.core.call.hls.HlsStatsReporter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -69,6 +70,10 @@ internal class CallSessionManager() {
 
     /** The call's HLS player. Set and cleared together with [playbackSession]. */
     val hlsPlayer = MutableStateFlow<HlsPlayer?>(null)
+
+    /** Reports [hlsPlayer] playback to `hls_stats`, when the backend enabled HLS stats. */
+    @Volatile
+    var hlsStatsReporter: HlsStatsReporter? = null
 
     var sessionId = UUID.randomUUID().toString()
 

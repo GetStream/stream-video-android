@@ -78,7 +78,10 @@ data class JoinCallRequest (
     val prefer: Prefer? = null,
 
     @Json(name = "playback_capabilities")
-    val playbackCapabilities: kotlin.collections.List<kotlin.String>? = emptyList()
+    val playbackCapabilities: kotlin.collections.List<kotlin.String>? = emptyList(),
+
+    @Json(name = "unified_session_id")
+    val unifiedSessionId: kotlin.String? = null
 )
 {
     

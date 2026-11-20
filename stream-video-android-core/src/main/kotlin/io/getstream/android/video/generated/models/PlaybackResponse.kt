@@ -48,7 +48,10 @@ data class PlaybackResponse (
     val reason: Reason,
 
     @Json(name = "type")
-    val type: Type
+    val type: Type,
+
+    @Json(name = "stats_token")
+    val statsToken: kotlin.String? = null
 )
 {
     
