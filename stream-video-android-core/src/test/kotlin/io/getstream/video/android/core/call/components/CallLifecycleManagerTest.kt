@@ -22,11 +22,13 @@ import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.hls.HlsPlayer
+import io.getstream.video.android.core.call.hls.HlsStatsReporter
 import io.getstream.video.android.core.model.PlaybackType
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import io.mockk.verifyOrder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -92,6 +94,24 @@ class CallLifecycleManagerTest {
             verify(exactly = 1) { player.release() }
             coVerify(exactly = 0) { playbackSession.sendLeaveEvent(any()) }
         }
+
+    @Test
+    fun `leave stops HLS stats reporting before releasing the player`() = runTest(testDispatcher) {
+        val player = mockk<HlsPlayer>(relaxed = true)
+        val reporter = mockk<HlsStatsReporter>(relaxed = true)
+        sessionManager.playbackSession = mockk(relaxed = true)
+        sessionManager.hlsPlayer.value = player
+        sessionManager.hlsStatsReporter = reporter
+
+        manager().leave("user")
+        advanceUntilIdle()
+
+        assertThat(sessionManager.hlsStatsReporter).isNull()
+        verifyOrder {
+            reporter.stop()
+            player.release()
+        }
+    }
 
     @Test
     fun `leave marks the call left until the next join resets the guard`() = runTest(

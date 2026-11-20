@@ -45,5 +45,11 @@ data class StatsOptions (
     val enableRtcStats: kotlin.Boolean,
 
     @Json(name = "reporting_interval_ms")
-    val reportingIntervalMs: kotlin.Int
+    val reportingIntervalMs: kotlin.Int,
+
+    @Json(name = "enable_hls_stats")
+    val enableHlsStats: kotlin.Boolean? = null,
+
+    @Json(name = "reporting_hls_interval_ms")
+    val reportingHlsIntervalMs: kotlin.Int? = null
 )

@@ -38,6 +38,7 @@ import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.call.hls.HlsPlayer
+import io.getstream.video.android.core.call.hls.HlsStatsReporter
 import io.getstream.video.android.core.call.scope.ScopeProvider
 import io.getstream.video.android.core.model.PlaybackType
 import io.mockk.coEvery
@@ -153,6 +154,10 @@ class CallJoinCoordinatorTest {
 
     private fun coordinator(
         createHlsPlayer: ((String) -> HlsPlayer)? = { hlsPlayer },
+        createHlsStatsReporter: (
+            HlsPlayer,
+            JoinCallResponse,
+        ) -> HlsStatsReporter? = { _, _ -> null },
     ) = CallJoinCoordinator(
         clientImpl = clientImpl,
         state = state,
@@ -171,6 +176,7 @@ class CallJoinCoordinatorTest {
         hasRequiredPermissions = { true },
         createPlaybackSession = { playbackSession },
         hlsPlayerFactory = { createHlsPlayer },
+        createHlsStatsReporter = createHlsStatsReporter,
     )
 
     private fun stubJoinCall(result: io.getstream.result.Result<JoinCallResponse>) {
@@ -841,6 +847,58 @@ class CallJoinCoordinatorTest {
         coVerify(exactly = 0) { mockSession.connectInternal() }
         verify(exactly = 0) { sessionMonitor.monitorSession(any()) }
         verify(exactly = 0) { media.updateMediaManagerFromSettings(any()) }
+    }
+
+    @Test
+    fun `HLS playback starts stats reporting for the installed player`() = runTest(testDispatcher) {
+        stubHlsPlayback()
+        val reporter = mockk<HlsStatsReporter>(relaxed = true)
+        var reportedPlayer: HlsPlayer? = null
+        var reportedResponse: JoinCallResponse? = null
+
+        coordinator(
+            createHlsStatsReporter = { player, response ->
+                reportedPlayer = player
+                reportedResponse = response
+                reporter
+            },
+        ).join()
+        advanceUntilIdle()
+
+        assertThat(reportedPlayer).isSameInstanceAs(hlsPlayer)
+        assertThat(reportedResponse).isSameInstanceAs(mockJoinResponse)
+        verify { reporter.start() }
+        verify { sessionManager.hlsStatsReporter = reporter }
+    }
+
+    @Test
+    fun `stats reporting that fails to start does not fail the HLS join`() = runTest(
+        testDispatcher,
+    ) {
+        stubHlsPlayback()
+        val reporter = mockk<HlsStatsReporter> {
+            every { start() } throws IllegalStateException("no listener")
+        }
+
+        val result = coordinator(createHlsStatsReporter = { _, _ -> reporter }).join()
+        advanceUntilIdle()
+
+        assertThat((result as Success).value).isSameInstanceAs(playbackSession)
+        assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.Hls(HLS_URL))
+        verify { sessionManager.hlsStatsReporter = null }
+        verify { callRegistry.markActive() }
+    }
+
+    @Test
+    fun `a WebRTC join does not start HLS stats reporting`() = runTest(testDispatcher) {
+        stubJoinCall(Success(mockJoinResponse))
+        coEvery { mockSession.connectInternal() } returns SfuConnectionResult.Success
+        var created = false
+
+        coordinator(createHlsStatsReporter = { _, _ -> null.also { created = true } }).join()
+        advanceUntilIdle()
+
+        assertThat(created).isFalse()
     }
 
     @Test

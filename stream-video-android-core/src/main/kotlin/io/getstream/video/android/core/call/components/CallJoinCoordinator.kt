@@ -40,6 +40,7 @@ import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.call.hls.HlsPlayer
+import io.getstream.video.android.core.call.hls.HlsStatsReporter
 import io.getstream.video.android.core.model.PlaybackType
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.ringing.RingJoinSource
@@ -80,6 +81,10 @@ internal class CallJoinCoordinator(
     // Returns the builder of the call's HLS player from a playlist URL, read at join time. Null
     // when the app registered no HlsPlayerFactory: the join then never asks for HLS.
     private val hlsPlayerFactory: () -> ((playlistUrl: String) -> HlsPlayer)? = { null },
+    // Builds the reporter of the HLS player's stats, or null when the join response did not
+    // enable HLS stats.
+    private val createHlsStatsReporter: (HlsPlayer, JoinCallResponse) -> HlsStatsReporter? =
+        { _, _ -> null },
 ) {
     private companion object {
         const val JOIN_FLIGHT_KEY = "join"
@@ -454,7 +459,7 @@ internal class CallJoinCoordinator(
             return result as Failure
         }
         result.value.playback?.let { playback ->
-            return joinPlayback(playback)
+            return joinPlayback(playback, result.value)
         }
         val sfuToken = result.value.credentials.token
         val sfuUrl = result.value.credentials.server.url
@@ -503,7 +508,10 @@ internal class CallJoinCoordinator(
      * The returned session is held as [CallSessionManager.playbackSession], never as the active
      * session, and the call's [HlsPlayer] as [CallSessionManager.hlsPlayer].
      */
-    private fun joinPlayback(playback: PlaybackResponse): Result<RtcSession> {
+    private fun joinPlayback(
+        playback: PlaybackResponse,
+        joinResponse: JoinCallResponse,
+    ): Result<RtcSession> {
         val playlistUrl = playback.playlistUrl
         val createPlayer = hlsPlayerFactory()
         if (playback.type != PlaybackResponse.Type.Hls || playlistUrl.isBlank() || createPlayer == null) {
@@ -536,12 +544,24 @@ internal class CallJoinCoordinator(
             logger.i { "[joinInternal] Joined with HLS playback (reason=${playback.reason})" }
             sessionManager.playbackSession = session
             sessionManager.hlsPlayer.value = player
+            sessionManager.hlsStatsReporter = startHlsStatsReporter(player, joinResponse)
             state._playbackType.value = PlaybackType.Hls(playlistUrl)
             state._connection.value = RealtimeConnection.Joined(session)
             callRegistry.markActive()
             state._connection.value = RealtimeConnection.Connected
             Success(session)
         }
+    }
+
+    /** Stats reporting is best effort: a reporter that fails to start leaves playback running. */
+    private fun startHlsStatsReporter(
+        player: HlsPlayer,
+        joinResponse: JoinCallResponse,
+    ): HlsStatsReporter? = try {
+        createHlsStatsReporter(player, joinResponse)?.also { it.start() }
+    } catch (e: Exception) {
+        logger.e(e) { "[joinPlayback] Could not start HLS stats reporting" }
+        null
     }
 
     private suspend fun completeJoinAfterSessionInstall(
