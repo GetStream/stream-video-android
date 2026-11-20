@@ -16,11 +16,11 @@
 
 package io.getstream.video.android.ui.call
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,13 +30,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
-import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleSpeakerphoneAction
+import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayerOverlay
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.hls.HlsVideoRenderer
 
 /**
- * The viewer screen for a call the backend serves as HLS. It is what an app with its own UI
- * writes: the broadcast, a mute toggle and a leave button.
+ * The viewer screen for a call the backend serves as HLS: the broadcast under the same overlay as
+ * the WebRTC livestream player (live badge, participant count, duration and a mute toggle), plus a
+ * leave button.
  */
 @Composable
 fun DemoHlsViewerScreen(
@@ -50,16 +51,22 @@ fun DemoHlsViewerScreen(
             modifier = Modifier.fillMaxSize(),
             audioEnabled = audioEnabled,
         )
-        Row(
+        Box(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(24.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                .fillMaxSize()
+                .safeDrawingPadding(),
         ) {
-            ToggleSpeakerphoneAction(isSpeakerphoneEnabled = audioEnabled) {
-                audioEnabled = it.isEnabled
-            }
-            LeaveCallAction { onLeave() }
+            LivestreamPlayerOverlay(
+                call = call,
+                isAudioEnabled = audioEnabled,
+                onAudioToggle = { audioEnabled = it },
+            )
+            LeaveCallAction(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(12.dp)
+                    .size(45.dp),
+            ) { onLeave() }
         }
     }
 }
