@@ -40,6 +40,7 @@ import io.getstream.video.android.core.call.components.CallSessionManager
 import io.getstream.video.android.core.call.components.ClientCallRegistry
 import io.getstream.video.android.core.call.components.RtcSessionFactory
 import io.getstream.video.android.core.call.components.SessionMonitor
+import io.getstream.video.android.core.model.PlaybackType
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -101,10 +102,12 @@ class JoinRecoverableFailureTest {
         every { state.connection } returns connectionFlow
         every { state.settings } returns MutableStateFlow<CallSettingsResponse?>(null)
         every { state.e2eeEnabled } returns MutableStateFlow(false)
+        every { state._playbackType } returns MutableStateFlow(PlaybackType.WebRtc)
+        every { mockJoinResponse.playback } returns null
         coEvery { clientImpl.getCachedLocation() } returns Success("test-location")
         coEvery {
             apiClient.joinRequest(
-                any(), any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
             )
         } returns Success(mockJoinResponse)
     }
@@ -130,6 +133,7 @@ class JoinRecoverableFailureTest {
         sessionMonitor = mockk<SessionMonitor>(relaxed = true),
         callRegistry = mockk<ClientCallRegistry>(relaxed = true),
         hasRequiredPermissions = { true },
+        createPlaybackSession = { mockk(relaxed = true) },
     )
 
     private suspend fun join() = coordinator().joinInternal(

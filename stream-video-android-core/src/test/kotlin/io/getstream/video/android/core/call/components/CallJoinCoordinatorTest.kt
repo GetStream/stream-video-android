@@ -19,6 +19,7 @@ package io.getstream.video.android.core.call.components
 import com.google.common.truth.Truth.assertThat
 import io.getstream.android.video.generated.models.CallSettingsResponse
 import io.getstream.android.video.generated.models.JoinCallResponse
+import io.getstream.android.video.generated.models.PlaybackResponse
 import io.getstream.android.video.generated.models.RingCallRequest
 import io.getstream.android.video.generated.models.RingCallResponse
 import io.getstream.result.Error
@@ -36,6 +37,9 @@ import io.getstream.video.android.core.base.DispatcherRule
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
+import io.getstream.video.android.core.call.hls.HlsPlayer
+import io.getstream.video.android.core.call.scope.ScopeProvider
+import io.getstream.video.android.core.model.PlaybackType
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -67,6 +71,10 @@ import kotlin.test.assertFailsWith
  */
 class CallJoinCoordinatorTest {
 
+    private companion object {
+        const val HLS_URL = "https://hls.example.com/playlist.m3u8"
+    }
+
     @get:Rule
     val dispatcherRule = DispatcherRule()
 
@@ -88,6 +96,11 @@ class CallJoinCoordinatorTest {
     private lateinit var connectionFlow: MutableStateFlow<RealtimeConnection>
     private lateinit var mockSession: RtcSession
     private lateinit var mockJoinResponse: JoinCallResponse
+    private lateinit var playbackTypeFlow: MutableStateFlow<PlaybackType>
+    private lateinit var playbackSession: RtcSession
+    private var heldPlaybackSession: RtcSession? = null
+    private lateinit var hlsPlayer: HlsPlayer
+    private lateinit var hlsPlayerFlow: MutableStateFlow<HlsPlayer?>
 
     @Before
     fun setup() {
@@ -114,6 +127,23 @@ class CallJoinCoordinatorTest {
         every { state.settings } returns MutableStateFlow<CallSettingsResponse?>(null)
         every { state.e2eeEnabled } returns MutableStateFlow(false)
         coEvery { clientImpl.getCachedLocation() } returns Success("test-location")
+
+        playbackTypeFlow = MutableStateFlow(PlaybackType.WebRtc)
+        playbackSession = mockk(relaxed = true)
+        heldPlaybackSession = null
+        every { state._playbackType } returns playbackTypeFlow
+        every { mockJoinResponse.playback } returns null
+        every { sessionManager.playbackSession } answers { heldPlaybackSession }
+        every { sessionManager.playbackSession = any() } answers {
+            heldPlaybackSession = firstArg()
+        }
+        hlsPlayer = mockk(relaxed = true)
+        hlsPlayerFlow = MutableStateFlow(null)
+        every { sessionManager.hlsPlayer } returns hlsPlayerFlow
+        every { lifecycle.hasLeaveStarted() } returns false
+        every { lifecycle.withLeaveLock(any<() -> Any?>()) } answers {
+            firstArg<() -> Any?>().invoke()
+        }
     }
 
     @After
@@ -121,7 +151,9 @@ class CallJoinCoordinatorTest {
         unmockkAll()
     }
 
-    private fun coordinator() = CallJoinCoordinator(
+    private fun coordinator(
+        createHlsPlayer: ((String) -> HlsPlayer)? = { hlsPlayer },
+    ) = CallJoinCoordinator(
         clientImpl = clientImpl,
         state = state,
         callAnalytics = callAnalytics,
@@ -137,14 +169,25 @@ class CallJoinCoordinatorTest {
         sessionMonitor = sessionMonitor,
         callRegistry = callRegistry,
         hasRequiredPermissions = { true },
+        createPlaybackSession = { playbackSession },
+        hlsPlayerFactory = { createHlsPlayer },
     )
 
     private fun stubJoinCall(result: io.getstream.result.Result<JoinCallResponse>) {
         coEvery {
             apiClient.joinRequest(
-                any(), any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
             )
         } returns result
+    }
+
+    private fun stubHlsPlayback() {
+        every { mockJoinResponse.playback } returns PlaybackResponse(
+            playlistUrl = HLS_URL,
+            reason = PlaybackResponse.Reason.Percentage,
+            type = PlaybackResponse.Type.Hls,
+        )
+        stubJoinCall(Success(mockJoinResponse))
     }
 
     @Test
@@ -194,6 +237,50 @@ class CallJoinCoordinatorTest {
                 hintHighScaleLivestreamPublisher = any(),
                 joinAnalyticsModel = any(),
                 e2ee = true,
+                playbackCapabilities = any(),
+            )
+        }
+    }
+
+    @Test
+    fun `first join declares HLS playback when a player factory is registered`() = runTest(
+        testDispatcher,
+    ) {
+        stubJoinCall(Success(mockJoinResponse))
+        coEvery { mockSession.connectInternal() } returns SfuConnectionResult.Success
+
+        coordinator().join()
+        advanceUntilIdle()
+
+        verifyPlaybackCapabilities(listOf("hls"))
+    }
+
+    @Test
+    fun `first join does not declare HLS playback without a player factory`() = runTest(
+        testDispatcher,
+    ) {
+        stubJoinCall(Success(mockJoinResponse))
+        coEvery { mockSession.connectInternal() } returns SfuConnectionResult.Success
+
+        coordinator(createHlsPlayer = null).join()
+        advanceUntilIdle()
+
+        verifyPlaybackCapabilities(null)
+    }
+
+    private fun verifyPlaybackCapabilities(expected: List<String>?) {
+        coVerify {
+            apiClient.joinRequest(
+                create = any(),
+                location = any(),
+                migratingFrom = any(),
+                migratingFromList = any(),
+                ring = any(),
+                notify = any(),
+                hintHighScaleLivestreamPublisher = any(),
+                joinAnalyticsModel = any(),
+                e2ee = any(),
+                playbackCapabilities = expected,
             )
         }
     }
@@ -240,6 +327,7 @@ class CallJoinCoordinatorTest {
                 any(),
                 any(),
                 any(),
+                any(),
             )
         }
     }
@@ -262,7 +350,7 @@ class CallJoinCoordinatorTest {
         verify(exactly = 0) { sessionManager.setActiveSession(null) }
         verify(exactly = 1) { callAnalytics.joinAnalytics.onJoinFunctionStart() }
         coVerify(exactly = 0) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
         // The single outer gate must also stop a second RtcSession from being installed.
         verify(exactly = 0) { sessionManager.setActiveSession(mockSession) }
@@ -280,7 +368,7 @@ class CallJoinCoordinatorTest {
         val joinAnalytics = callAnalytics.joinAnalytics
         verify(exactly = 1) { joinAnalytics.onJoinFunctionStart() }
         coVerify(exactly = 0) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
     }
 
@@ -299,7 +387,7 @@ class CallJoinCoordinatorTest {
         assertThat(result).isInstanceOf(Success::class.java)
         assertThat((result as Success).value).isSameInstanceAs(existing)
         coVerify(exactly = 0) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
         verify { existing.sfuTracer.trace("join-already-joined", any()) }
         // The guard must not tear down the live session's SFU observers: nothing on this path
@@ -359,7 +447,7 @@ class CallJoinCoordinatorTest {
         assertThat(results.map { (it as Success).value }.distinct()).hasSize(1)
         // One join request and one SFU connect for five callers.
         coVerify(exactly = 1) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
         coVerify(exactly = 1) { mockSession.connectInternal() }
         verify(exactly = 1) { sessionManager.setActiveSession(mockSession) }
@@ -469,7 +557,7 @@ class CallJoinCoordinatorTest {
 
         verify(exactly = 1) { state.callJoinInterceptor = interceptor }
         coVerify(exactly = 0) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
 
         guestGate.complete(Unit)
@@ -494,7 +582,7 @@ class CallJoinCoordinatorTest {
         advanceUntilIdle()
 
         coVerify(exactly = 2) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
     }
 
@@ -527,7 +615,7 @@ class CallJoinCoordinatorTest {
 
         assertThat(secondResult).isInstanceOf(Success::class.java)
         coVerify(exactly = 1) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
         coVerify(exactly = 1) { mockSession.connectInternal() }
     }
@@ -536,7 +624,7 @@ class CallJoinCoordinatorTest {
     fun `cancelling the last waiter does not abort the shared join`() = runTest(testDispatcher) {
         val joinRequestGate = CompletableDeferred<Unit>()
         coEvery {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         } coAnswers {
             joinRequestGate.await()
             Success(mockJoinResponse)
@@ -568,7 +656,7 @@ class CallJoinCoordinatorTest {
         assertThat(retry).isInstanceOf(Success::class.java)
         assertThat((retry as Success).value).isSameInstanceAs(mockSession)
         coVerify(exactly = 1) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
     }
 
@@ -578,7 +666,7 @@ class CallJoinCoordinatorTest {
     ) {
         val joinRequestGate = CompletableDeferred<Unit>()
         coEvery {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         } coAnswers {
             joinRequestGate.await()
             Success(mockJoinResponse)
@@ -632,7 +720,7 @@ class CallJoinCoordinatorTest {
         assertThat(retry).isInstanceOf(Success::class.java)
         assertThat((retry as Success).value).isSameInstanceAs(mockSession)
         coVerify(exactly = 1) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
     }
 
@@ -734,5 +822,148 @@ class CallJoinCoordinatorTest {
 
         assertThat(result).isInstanceOf(Failure::class.java)
         coVerify { lifecycle.leave(any<CallLeaveReason>()) }
+    }
+
+    @Test
+    fun `HLS playback joins without an SFU connection`() = runTest(testDispatcher) {
+        stubHlsPlayback()
+
+        val result = coordinator().join()
+        advanceUntilIdle()
+
+        assertThat((result as Success).value).isSameInstanceAs(playbackSession)
+        assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.Hls(HLS_URL))
+        assertThat(connectionFlow.value).isEqualTo(RealtimeConnection.Connected)
+        assertThat(heldPlaybackSession).isSameInstanceAs(playbackSession)
+        assertThat(hlsPlayerFlow.value).isSameInstanceAs(hlsPlayer)
+        assertThat(sessionFlow.value).isNull()
+        verify { callRegistry.markActive() }
+        coVerify(exactly = 0) { mockSession.connectInternal() }
+        verify(exactly = 0) { sessionMonitor.monitorSession(any()) }
+        verify(exactly = 0) { media.updateMediaManagerFromSettings(any()) }
+    }
+
+    @Test
+    fun `join after HLS playback returns the playback session`() = runTest(testDispatcher) {
+        stubHlsPlayback()
+        val coordinator = coordinator()
+
+        coordinator.join()
+        advanceUntilIdle()
+        val second = coordinator.join()
+        advanceUntilIdle()
+
+        assertThat((second as Success).value).isSameInstanceAs(playbackSession)
+        coVerify(exactly = 1) {
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `an unplayable playback grant fails the join`() = runTest(testDispatcher) {
+        every { mockJoinResponse.playback } returns PlaybackResponse(
+            playlistUrl = HLS_URL,
+            reason = PlaybackResponse.Reason.Percentage,
+            type = PlaybackResponse.Type.Unknown("dash"),
+        )
+        stubJoinCall(Success(mockJoinResponse))
+
+        val result = coordinator().join()
+        advanceUntilIdle()
+
+        assertThat(result).isInstanceOf(Failure::class.java)
+        assertThat(connectionFlow.value).isInstanceOf(RealtimeConnection.Failed::class.java)
+        assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.WebRtc)
+        assertThat(heldPlaybackSession).isNull()
+        assertThat(hlsPlayerFlow.value).isNull()
+        verify(exactly = 0) { callRegistry.markActive() }
+        coVerify(exactly = 0) { mockSession.connectInternal() }
+    }
+
+    @Test
+    fun `an HLS grant without a player factory fails the join`() = runTest(testDispatcher) {
+        stubHlsPlayback()
+
+        val result = coordinator(createHlsPlayer = null).join()
+        advanceUntilIdle()
+
+        assertThat(result).isInstanceOf(Failure::class.java)
+        assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.WebRtc)
+        assertThat(heldPlaybackSession).isNull()
+        verify(exactly = 0) { callRegistry.markActive() }
+    }
+
+    @Test
+    fun `a player that cannot be created fails the HLS join without installing it`() = runTest(
+        testDispatcher,
+    ) {
+        stubHlsPlayback()
+
+        val result = coordinator(createHlsPlayer = { error("no player") }).join()
+        advanceUntilIdle()
+
+        assertThat(result).isInstanceOf(Failure::class.java)
+        assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.WebRtc)
+        assertThat(heldPlaybackSession).isNull()
+        assertThat(hlsPlayerFlow.value).isNull()
+        assertThat(connectionFlow.value).isInstanceOf(RealtimeConnection.Failed::class.java)
+        verify { playbackSession.cleanup() }
+        verify(exactly = 0) { callRegistry.markActive() }
+    }
+
+    @Test
+    fun `an HLS grant that arrives after leave does not activate the call`() = runTest(
+        testDispatcher,
+    ) {
+        val sessions = CallSessionManager()
+        sessionManager = sessions
+        lifecycle = CallLifecycleManager(
+            clientImpl = clientImpl,
+            sessionManager = sessions,
+            scopeProvider = mockk<ScopeProvider>(relaxed = true),
+            callRegistry = callRegistry,
+            shutDownJobs = {},
+            state = state,
+            callAnalytics = callAnalytics,
+            statsReporter = mockk<CallStatsReporter>(relaxed = true),
+            media = media,
+            iceMonitor = mockk<CallIceConnectionMonitor>(relaxed = true),
+            sessionMonitor = { sessionMonitor },
+            connectivityMonitor = { mockk<CallConnectivityMonitor>(relaxed = true) },
+            type = "default",
+            id = "test-call",
+        )
+        every { clientImpl.scope } returns testScope
+        stubHlsPlayback()
+        var requests = 0
+        coEvery {
+            apiClient.joinRequest(
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+            )
+        } coAnswers {
+            requests += 1
+            if (requests == 1) lifecycle.leave("user")
+            Success(mockJoinResponse)
+        }
+
+        val coordinator = coordinator()
+        val first = coordinator.join()
+
+        assertThat(first).isInstanceOf(Failure::class.java)
+        assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.WebRtc)
+        assertThat(sessions.playbackSession).isNull()
+        assertThat(sessions.hlsPlayer.value).isNull()
+        assertThat(connectionFlow.value).isEqualTo(RealtimeConnection.Disconnected)
+        verify(exactly = 0) { callRegistry.markActive() }
+
+        advanceUntilIdle()
+        val second = coordinator.join()
+        advanceUntilIdle()
+
+        assertThat((second as Success).value).isSameInstanceAs(playbackSession)
+        assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.Hls(HLS_URL))
+        assertThat(sessions.hlsPlayer.value).isSameInstanceAs(hlsPlayer)
+        assertThat(connectionFlow.value).isEqualTo(RealtimeConnection.Connected)
+        verify(exactly = 1) { callRegistry.markActive() }
     }
 }
