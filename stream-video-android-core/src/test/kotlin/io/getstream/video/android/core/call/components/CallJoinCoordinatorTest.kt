@@ -170,7 +170,7 @@ class CallJoinCoordinatorTest {
         callRegistry = callRegistry,
         hasRequiredPermissions = { true },
         createPlaybackSession = { playbackSession },
-        createHlsPlayer = createHlsPlayer,
+        hlsPlayerFactory = { createHlsPlayer },
     )
 
     private fun stubJoinCall(result: io.getstream.result.Result<JoinCallResponse>) {

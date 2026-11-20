@@ -562,10 +562,12 @@ public class Call(
         },
         createPlaybackSession = playbackSessionFactory,
         consumeJoinSource = { consumeJoinSource() },
-        createHlsPlayer = clientImpl.hlsPlayerFactory?.let { factory ->
-            {
-                    playlistUrl ->
-                factory.create(clientImpl.context, playlistUrl)
+        hlsPlayerFactory = {
+            clientImpl.hlsPlayerFactory?.let { factory ->
+                {
+                        playlistUrl ->
+                    factory.create(clientImpl.context, playlistUrl)
+                }
             }
         },
     )

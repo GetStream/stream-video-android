@@ -26,9 +26,9 @@ import kotlinx.coroutines.flow.StateFlow
  * Plays the HLS broadcast of one [Call].
  *
  * The call owns its player: one is created when the backend serves the call as HLS, and it is
- * released when the call is left. A renderer only shows and hides the video with [attach] and
- * [detach]. Playback, including audio, continues while no renderer is shown, the same as a WebRTC
- * call, and a renderer that is recreated, for example on rotation, shows the same player.
+ * released when the call is left. Joining alone plays nothing: playback, including audio, starts
+ * at the first [attach]. From then on it continues while no renderer is shown, the same as a
+ * WebRTC call, and a renderer that is recreated, for example on rotation, shows the same player.
  *
  * The player draws to one surface at a time: showing the same call in two renderers at once is
  * not supported.

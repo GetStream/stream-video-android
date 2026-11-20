@@ -77,9 +77,9 @@ internal class CallJoinCoordinator(
     private val createPlaybackSession: () -> RtcSession,
     // Reads and clears the source of a ring-driven join; see Call.consumeJoinSource.
     private val consumeJoinSource: () -> RingJoinSource? = { null },
-    // Builds the call's HLS player from a playlist URL. Null when the app registered no
-    // HlsPlayerFactory: the join then never asks for HLS.
-    private val createHlsPlayer: ((playlistUrl: String) -> HlsPlayer)? = null,
+    // Returns the builder of the call's HLS player from a playlist URL, read at join time. Null
+    // when the app registered no HlsPlayerFactory: the join then never asks for HLS.
+    private val hlsPlayerFactory: () -> ((playlistUrl: String) -> HlsPlayer)? = { null },
 ) {
     private companion object {
         const val JOIN_FLIGHT_KEY = "join"
@@ -443,7 +443,7 @@ internal class CallJoinCoordinator(
                 // The coordinator rejects a join whose flag disagrees with the call. This is
                 // the first join; rejoin / migrate omit it and CallApiClient reads the manager.
                 e2ee = state.e2eeEnabled.value,
-                playbackCapabilities = createHlsPlayer?.let {
+                playbackCapabilities = hlsPlayerFactory()?.let {
                     listOf(
                         PlaybackResponse.Type.Hls.value,
                     )
@@ -505,7 +505,7 @@ internal class CallJoinCoordinator(
      */
     private fun joinPlayback(playback: PlaybackResponse): Result<RtcSession> {
         val playlistUrl = playback.playlistUrl
-        val createPlayer = createHlsPlayer
+        val createPlayer = hlsPlayerFactory()
         if (playback.type != PlaybackResponse.Type.Hls || playlistUrl.isBlank() || createPlayer == null) {
             logger.e {
                 "[joinInternal] Unsupported playback (type=${playback.type}, " +
