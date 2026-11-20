@@ -20,12 +20,14 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.view.SurfaceView
+import androidx.annotation.OptIn
 import androidx.media3.common.C
 import androidx.media3.common.Format
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.VideoSize
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.analytics.AnalyticsListener
 import io.getstream.video.android.core.StreamVideoBuilder
@@ -117,6 +119,7 @@ internal class ExoHlsPlayer(
         player?.let(::reportState)
     }
 
+    @OptIn(UnstableApi::class)
     override fun readPlaybackMetrics(): HlsPlaybackMetrics? {
         val player = player ?: return null
         val format = player.videoFormat
