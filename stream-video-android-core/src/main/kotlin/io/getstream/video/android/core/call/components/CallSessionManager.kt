@@ -20,6 +20,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.EmptyRtcSession
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.hls.HlsPlayer
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -69,6 +70,13 @@ internal class CallSessionManager() {
 
     /** The call's HLS player. Set and cleared together with [playbackSession]. */
     val hlsPlayer = MutableStateFlow<HlsPlayer?>(null)
+
+    /**
+     * Leaves the call when it ends during HLS playback, see [CallJoinCoordinator]. Started and
+     * cancelled together with [playbackSession].
+     */
+    @Volatile
+    var playbackEndedJob: Job? = null
 
     var sessionId = UUID.randomUUID().toString()
 

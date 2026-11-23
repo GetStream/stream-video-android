@@ -174,6 +174,8 @@ internal class CallLifecycleManager(
     }
 
     private fun clearPlayback() {
+        sessionManager.playbackEndedJob?.cancel()
+        sessionManager.playbackEndedJob = null
         val player = sessionManager.hlsPlayer.value
         sessionManager.hlsPlayer.value = null
         state._playbackType.value = PlaybackType.WebRtc

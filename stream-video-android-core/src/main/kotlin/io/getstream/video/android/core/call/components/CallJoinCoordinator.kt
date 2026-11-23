@@ -540,7 +540,29 @@ internal class CallJoinCoordinator(
             state._connection.value = RealtimeConnection.Joined(session)
             callRegistry.markActive()
             state._connection.value = RealtimeConnection.Connected
+            observePlaybackEnded()
             Success(session)
+        }
+    }
+
+    /**
+     * Leaves the call once it ends while joined over HLS. With no SFU there is no SFU call-ended
+     * event, so a missed coordinator `call.ended` event would keep the viewer connected. Call
+     * updates also set [CallState.endedAt], so any new value counts; one already set at join
+     * does not. Cancelled when playback is cleared, and leave runs only once, so this never
+     * leaves a second time after `call.ended`.
+     */
+    private fun observePlaybackEnded() {
+        val endedAtOnJoin = state.endedAt.value
+        sessionManager.playbackEndedJob = scope.launch {
+            state.endedAt.first { it != null && it != endedAtOnJoin }
+            logger.i { "[joinPlayback] Call ended during HLS playback — leaving" }
+            lifecycle.leave(
+                CallLeaveReason.Backend(
+                    cause = BackendCause.CALL_ENDED_EVENT,
+                    message = "call-ended-during-hls-playback",
+                ),
+            )
         }
     }
 
