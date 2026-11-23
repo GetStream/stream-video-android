@@ -22,6 +22,7 @@ import android.os.Looper
 import android.view.SurfaceView
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.VideoSize
 import androidx.media3.exoplayer.ExoPlayer
@@ -117,11 +118,7 @@ internal class ExoHlsPlayer(
         val player = ExoPlayer.Builder(context).build()
         try {
             player.addListener(
-                object : Player.Listener {
-                    override fun onVideoSizeChanged(videoSize: VideoSize) {
-                        videoAspectRatioOf(videoSize)?.let { _videoAspectRatio.value = it }
-                    }
-                },
+                ExoHlsPlayerListener(player) { _videoAspectRatio.value = it },
             )
             player.volume = volumeFor(audioEnabled)
             // Set the MIME type so playlist URLs without an .m3u8 extension still play as HLS.
@@ -140,6 +137,28 @@ internal class ExoHlsPlayer(
     }
 
     private fun volumeFor(enabled: Boolean): Float = if (enabled) 1f else 0f
+}
+
+/**
+ * Publishes the stream's aspect ratio and rejoins the live edge when playback falls behind the
+ * live window. Other errors are left to the player's default handling.
+ */
+internal class ExoHlsPlayerListener(
+    private val player: Player,
+    private val onVideoAspectRatio: (Float) -> Unit,
+) : Player.Listener {
+
+    override fun onVideoSizeChanged(videoSize: VideoSize) {
+        videoAspectRatioOf(videoSize)?.let(onVideoAspectRatio)
+    }
+
+    override fun onPlayerError(error: PlaybackException) {
+        // The live window moved past the playback position, e.g. after a stall or a long pause.
+        if (error.errorCode == PlaybackException.ERROR_CODE_BEHIND_LIVE_WINDOW) {
+            player.seekToDefaultPosition()
+            player.prepare()
+        }
+    }
 }
 
 /** Display aspect ratio of [videoSize], accounting for non-square pixels. Null while unknown. */
