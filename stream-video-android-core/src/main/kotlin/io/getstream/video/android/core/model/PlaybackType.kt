@@ -33,7 +33,11 @@ public sealed interface PlaybackType {
 
     /**
      * Media comes from the call's HLS broadcast at [playlistUrl]. There is no SFU connection, so
-     * participants have no video or audio tracks and the client cannot publish.
+     * participants have no video or audio tracks and the client cannot publish. The renderer from
+     * `stream-video-android-hls` shows the broadcast.
+     *
+     * The call stays on HLS until it is left. If the host stops the HLS broadcast, or the viewer
+     * is granted permission to publish, the call is not moved to WebRTC: leave and join again.
      */
     public data class Hls(val playlistUrl: String) : PlaybackType
 }

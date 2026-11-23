@@ -117,7 +117,10 @@ import java.net.ConnectException
  * @property hlsPlayerFactory Enables HLS playback for viewers. When set, a join tells the backend
  *          that this client can play HLS, and a call served that way plays through the player it
  *          builds. Null by default: every call joins over WebRTC. The `stream-video-android-hls`
- *          artifact provides `ExoHlsPlayerFactory`. Beta.
+ *          artifact provides `ExoHlsPlayerFactory`. A call joined over HLS stays on HLS until it is
+ *          left: if the host stops the HLS broadcast, or the viewer is granted permission to
+ *          publish, the call is not moved to WebRTC, and the viewer has to leave and join again.
+ *          Beta.
  *
  * @see build
  * @see ClientState.connection
