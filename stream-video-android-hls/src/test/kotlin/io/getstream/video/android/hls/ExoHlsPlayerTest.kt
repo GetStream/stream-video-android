@@ -18,6 +18,7 @@ package io.getstream.video.android.hls
 
 import android.os.Looper
 import android.view.SurfaceView
+import androidx.media3.common.MimeTypes
 import androidx.media3.common.VideoSize
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
@@ -54,6 +55,21 @@ internal class ExoHlsPlayerTest {
         val exoPlayer = player.exoPlayer!!
         assertThat(exoPlayer.currentMediaItem?.localConfiguration?.uri.toString()).isEqualTo(URL)
         assertThat(exoPlayer.playWhenReady).isTrue()
+    }
+
+    @Test
+    fun `a playlist url without an m3u8 extension still plays as hls`() {
+        val url = "https://example.com/playlist?token=abc"
+        val player = ExoHlsPlayerFactory().create(application, url) as ExoHlsPlayer
+        try {
+            player.attach(SurfaceView(application))
+
+            val mediaItem = player.exoPlayer!!.currentMediaItem!!
+            assertThat(mediaItem.localConfiguration?.uri.toString()).isEqualTo(url)
+            assertThat(mediaItem.localConfiguration?.mimeType).isEqualTo(MimeTypes.APPLICATION_M3U8)
+        } finally {
+            player.release()
+        }
     }
 
     @Test

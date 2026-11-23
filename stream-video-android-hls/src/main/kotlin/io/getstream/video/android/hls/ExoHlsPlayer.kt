@@ -21,6 +21,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.SurfaceView
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MimeTypes
 import androidx.media3.common.Player
 import androidx.media3.common.VideoSize
 import androidx.media3.exoplayer.ExoPlayer
@@ -123,7 +124,13 @@ internal class ExoHlsPlayer(
                 },
             )
             player.volume = volumeFor(audioEnabled)
-            player.setMediaItem(MediaItem.fromUri(playlistUrl))
+            // Set the MIME type so playlist URLs without an .m3u8 extension still play as HLS.
+            player.setMediaItem(
+                MediaItem.Builder()
+                    .setUri(playlistUrl)
+                    .setMimeType(MimeTypes.APPLICATION_M3U8)
+                    .build(),
+            )
             player.prepare()
         } catch (error: Throwable) {
             player.release()
