@@ -186,6 +186,30 @@ class CallJoinCoordinatorTest {
         hlsPlayerFactory = { createHlsPlayer },
     )
 
+    /** Replaces the mocked session manager and lifecycle with real ones sharing the test scope. */
+    private fun useRealLifecycle(): CallSessionManager {
+        val sessions = CallSessionManager()
+        sessionManager = sessions
+        lifecycle = CallLifecycleManager(
+            clientImpl = clientImpl,
+            sessionManager = sessions,
+            scopeProvider = mockk<ScopeProvider>(relaxed = true),
+            callRegistry = callRegistry,
+            shutDownJobs = {},
+            state = state,
+            callAnalytics = callAnalytics,
+            statsReporter = mockk<CallStatsReporter>(relaxed = true),
+            media = media,
+            iceMonitor = mockk<CallIceConnectionMonitor>(relaxed = true),
+            sessionMonitor = { sessionMonitor },
+            connectivityMonitor = { mockk<CallConnectivityMonitor>(relaxed = true) },
+            type = "default",
+            id = "test-call",
+        )
+        every { clientImpl.scope } returns testScope
+        return sessions
+    }
+
     private fun stubJoinCall(result: io.getstream.result.Result<JoinCallResponse>) {
         coEvery {
             apiClient.joinRequest(
@@ -959,25 +983,7 @@ class CallJoinCoordinatorTest {
     fun `an HLS grant that arrives after leave does not activate the call`() = runTest(
         testDispatcher,
     ) {
-        val sessions = CallSessionManager()
-        sessionManager = sessions
-        lifecycle = CallLifecycleManager(
-            clientImpl = clientImpl,
-            sessionManager = sessions,
-            scopeProvider = mockk<ScopeProvider>(relaxed = true),
-            callRegistry = callRegistry,
-            shutDownJobs = {},
-            state = state,
-            callAnalytics = callAnalytics,
-            statsReporter = mockk<CallStatsReporter>(relaxed = true),
-            media = media,
-            iceMonitor = mockk<CallIceConnectionMonitor>(relaxed = true),
-            sessionMonitor = { sessionMonitor },
-            connectivityMonitor = { mockk<CallConnectivityMonitor>(relaxed = true) },
-            type = "default",
-            id = "test-call",
-        )
-        every { clientImpl.scope } returns testScope
+        val sessions = useRealLifecycle()
         stubHlsPlayback()
         var requests = 0
         coEvery {
@@ -1055,25 +1061,7 @@ class CallJoinCoordinatorTest {
     fun `leaving the call stops watching for the end of HLS playback`() = runTest(
         testDispatcher,
     ) {
-        val sessions = CallSessionManager()
-        sessionManager = sessions
-        lifecycle = CallLifecycleManager(
-            clientImpl = clientImpl,
-            sessionManager = sessions,
-            scopeProvider = mockk<ScopeProvider>(relaxed = true),
-            callRegistry = callRegistry,
-            shutDownJobs = {},
-            state = state,
-            callAnalytics = callAnalytics,
-            statsReporter = mockk<CallStatsReporter>(relaxed = true),
-            media = media,
-            iceMonitor = mockk<CallIceConnectionMonitor>(relaxed = true),
-            sessionMonitor = { sessionMonitor },
-            connectivityMonitor = { mockk<CallConnectivityMonitor>(relaxed = true) },
-            type = "default",
-            id = "test-call",
-        )
-        every { clientImpl.scope } returns testScope
+        val sessions = useRealLifecycle()
         stubHlsPlayback()
 
         coordinator().join()
@@ -1086,5 +1074,28 @@ class CallJoinCoordinatorTest {
 
         assertThat(observer.isCancelled).isTrue()
         assertThat(sessions.playbackEndedJob).isNull()
+    }
+
+    @Test
+    fun `a leave while the join waits for the guest token is not reset by that join`() = runTest(
+        testDispatcher,
+    ) {
+        val sessions = useRealLifecycle()
+        stubHlsPlayback()
+        val guestGate = CompletableDeferred<Unit>()
+        every { clientImpl.guestUserJob } returns testScope.async { guestGate.await() }
+
+        val join = async { coordinator().join() }
+        advanceUntilIdle()
+        lifecycle.leave("user")
+        guestGate.complete(Unit)
+        advanceUntilIdle()
+
+        assertThat(join.await()).isInstanceOf(Failure::class.java)
+        assertThat(lifecycle.hasLeaveStarted()).isTrue()
+        assertThat(sessions.playbackSession).isNull()
+        assertThat(sessions.hlsPlayer.value).isNull()
+        assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.WebRtc)
+        verify(exactly = 0) { callRegistry.markActive() }
     }
 }

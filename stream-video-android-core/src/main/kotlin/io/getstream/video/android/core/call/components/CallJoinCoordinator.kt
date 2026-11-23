@@ -237,6 +237,10 @@ internal class CallJoinCoordinator(
             return Success(existing)
         }
 
+        // Before any suspend: a leave that lands while this join waits (guest token, audio
+        // factory, coordinator request) must stay visible to the checks below, not be reset.
+        lifecycle.resetLeaveGuard()
+
         // Live-select before any suspend so coalesced waiters and SFU observers see the
         // first non-cancelled waiter's interceptor, not a stale leader after Activity death.
         syncCallJoinInterceptor()
@@ -275,7 +279,6 @@ internal class CallJoinCoordinator(
 
         var result: Result<RtcSession>
 
-        lifecycle.resetLeaveGuard()
         while (retryCount < 3) {
             result = joinInternal(
                 create,
