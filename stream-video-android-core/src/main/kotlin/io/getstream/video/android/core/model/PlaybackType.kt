@@ -17,12 +17,14 @@
 package io.getstream.video.android.core.model
 
 import androidx.compose.runtime.Stable
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 
 /**
  * How this client receives the call's media, as decided by the backend when the call is joined.
  *
  * Beta: HLS delivery is enabled per call type by Stream and may change.
  */
+@ExperimentalStreamVideoApi
 @Stable
 public sealed interface PlaybackType {
 

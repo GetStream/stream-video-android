@@ -20,6 +20,7 @@ import android.content.Context
 import android.view.SurfaceView
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideoBuilder
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -35,6 +36,7 @@ import kotlinx.coroutines.flow.StateFlow
  *
  * Beta: HLS delivery is enabled per call type by Stream and may change.
  */
+@ExperimentalStreamVideoApi
 public interface HlsPlayer {
 
     public val playlistUrl: String
@@ -67,7 +69,13 @@ public interface HlsPlayer {
  * and every call joins over WebRTC.
  *
  * The `stream-video-android-hls` artifact provides the ExoPlayer implementation.
+ *
+ * Beta: HLS delivery is enabled per call type by Stream and may change.
  */
+// Not marked experimental itself: StreamVideoBuilder takes it, and a type in a constructor's
+// signature would make every StreamVideoBuilder call need the opt-in. Implementing it needs the
+// opt-in anyway, since it returns an HlsPlayer.
+@OptIn(ExperimentalStreamVideoApi::class)
 public fun interface HlsPlayerFactory {
 
     /**

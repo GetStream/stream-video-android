@@ -40,6 +40,7 @@ import io.getstream.video.android.core.call.components.CallSessionManager
 import io.getstream.video.android.core.call.components.ClientCallRegistry
 import io.getstream.video.android.core.call.components.RtcSessionFactory
 import io.getstream.video.android.core.call.components.SessionMonitor
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.model.PlaybackType
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -69,6 +70,7 @@ import stream.video.sfu.models.WebsocketReconnectStrategy
  *   loop already started by stateJob.
  * - [SfuConnectFailureCause.TerminalSocketFailure] fails immediately.
  */
+@OptIn(ExperimentalStreamVideoApi::class)
 class JoinRecoverableFailureTest {
 
     @get:Rule

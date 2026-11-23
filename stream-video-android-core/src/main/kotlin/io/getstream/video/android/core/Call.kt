@@ -82,6 +82,7 @@ import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
 import io.getstream.video.android.core.e2ee.E2EEManager
 import io.getstream.video.android.core.e2ee.StreamEncryptionManager
 import io.getstream.video.android.core.events.VideoEventListener
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.core.model.QueriedMembers
@@ -177,6 +178,7 @@ public class Call(
      * renderer in `stream-video-android-hls`.
      */
     @InternalStreamVideoApi
+    @ExperimentalStreamVideoApi
     public val hlsPlayer: StateFlow<HlsPlayer?> get() = sessionManager.hlsPlayer
 
     var sessionId: String
@@ -541,6 +543,7 @@ public class Call(
     internal val mediaManager get() = media.mediaManager
 
     /** Delegate that drives the join flow (permissions, retry loop, session creation). */
+    @OptIn(ExperimentalStreamVideoApi::class)
     private val joinCoordinator = CallJoinCoordinator(
         clientImpl = clientImpl,
         state = state,

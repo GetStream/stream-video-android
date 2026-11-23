@@ -41,6 +41,7 @@ import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.call.hls.HlsPlayer
 import io.getstream.video.android.core.call.scope.ScopeProvider
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.model.PlaybackType
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -74,6 +75,7 @@ import kotlin.test.assertFailsWith
  * apiClient / reconnector / sessionMonitor) and the client-state registrations (via
  * [ClientCallRegistry]) can be stubbed and verified precisely.
  */
+@OptIn(ExperimentalStreamVideoApi::class)
 class CallJoinCoordinatorTest {
 
     private companion object {

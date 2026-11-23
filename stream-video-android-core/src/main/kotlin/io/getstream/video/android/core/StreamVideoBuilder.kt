@@ -25,6 +25,7 @@ import io.getstream.log.StreamLog
 import io.getstream.log.streamLog
 import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.call.hls.HlsPlayerFactory
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
@@ -175,6 +176,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val connectOnInit: Boolean = true,
     private val rejectCallWhenBusy: Boolean = false,
     private val ringStatePolling: RingStatePollingConfig? = RingStatePollingConfig(),
+    @ExperimentalStreamVideoApi
     private val hlsPlayerFactory: HlsPlayerFactory? = null,
 ) {
     private val context: Context = context.applicationContext
@@ -225,6 +227,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
      * @throws IllegalArgumentException If [user] type is [UserType.Authenticated] and both [token] and [tokenProvider] are empty.
      * @throws ConnectException If the WebSocket connection fails.
      */
+    @OptIn(ExperimentalStreamVideoApi::class)
     public fun build(): StreamVideo {
         val lifecycle = ProcessLifecycleOwner.get().lifecycle
 

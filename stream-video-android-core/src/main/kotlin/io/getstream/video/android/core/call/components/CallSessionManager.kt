@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalStreamVideoApi::class)
+
 package io.getstream.video.android.core.call.components
 
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.EmptyRtcSession
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.hls.HlsPlayer
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
