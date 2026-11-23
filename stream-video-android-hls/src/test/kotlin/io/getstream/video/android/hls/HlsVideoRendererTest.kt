@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.ComposeView
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.hls.HlsPlayer
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
@@ -53,6 +54,7 @@ import java.time.Duration
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33])
+@OptIn(ExperimentalStreamVideoApi::class)
 internal class HlsVideoRendererTest {
 
     private companion object {

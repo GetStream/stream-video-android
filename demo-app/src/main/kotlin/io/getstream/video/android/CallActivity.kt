@@ -43,6 +43,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.e2ee.E2EEEventType
 import io.getstream.video.android.core.e2ee.StreamEncryptionManager
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.model.PlaybackType
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.ui.call.CallScreen
@@ -67,7 +68,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.ConcurrentHashMap
 
-@OptIn(StreamCallActivityDelicateApi::class)
+@OptIn(StreamCallActivityDelicateApi::class, ExperimentalStreamVideoApi::class)
 class CallActivity : ComposeStreamCallActivity() {
 
     companion object {

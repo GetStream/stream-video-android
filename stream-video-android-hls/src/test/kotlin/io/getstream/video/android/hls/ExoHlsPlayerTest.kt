@@ -22,6 +22,7 @@ import androidx.media3.common.C
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.VideoSize
 import com.google.common.truth.Truth.assertThat
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,6 +34,7 @@ import kotlin.concurrent.thread
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33])
+@OptIn(ExperimentalStreamVideoApi::class)
 internal class ExoHlsPlayerTest {
 
     private companion object {

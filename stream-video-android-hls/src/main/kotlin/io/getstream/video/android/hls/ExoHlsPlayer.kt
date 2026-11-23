@@ -31,6 +31,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.call.hls.HlsPlayer
 import io.getstream.video.android.core.call.hls.HlsPlayerFactory
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -49,6 +50,7 @@ import kotlinx.coroutines.flow.asStateFlow
  * ).build()
  * ```
  */
+@ExperimentalStreamVideoApi
 public class ExoHlsPlayerFactory : HlsPlayerFactory {
 
     override fun create(context: Context, playlistUrl: String): HlsPlayer =
@@ -59,6 +61,7 @@ public class ExoHlsPlayerFactory : HlsPlayerFactory {
  * [HlsPlayer] backed by ExoPlayer. ExoPlayer is bound to the thread that builds it, so it is built
  * on the main thread at the first [attach] rather than when the call joins.
  */
+@OptIn(ExperimentalStreamVideoApi::class)
 internal class ExoHlsPlayer(
     private val context: Context,
     override val playlistUrl: String,
