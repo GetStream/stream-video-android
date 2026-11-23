@@ -32,6 +32,7 @@ import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.analytics.call.CallAnalytics
+import io.getstream.video.android.core.analytics.call.observer.JoinAnalytics
 import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.base.DispatcherRule
@@ -338,6 +339,38 @@ class CallJoinCoordinatorTest {
         assertThat(result).isInstanceOf(Failure::class.java)
         assertThat(connectionFlow.value).isInstanceOf(RealtimeConnection.Failed::class.java)
     }
+
+    @Test
+    fun `a join that fails after leave started returns without marking the call failed`() =
+        runTest(testDispatcher) {
+            val joinAnalytics = mockk<JoinAnalytics>(relaxed = true)
+            every { callAnalytics.joinAnalytics } returns joinAnalytics
+            var leaveStarted = false
+            every { lifecycle.hasLeaveStarted() } answers { leaveStarted }
+            coEvery {
+                apiClient.joinRequest(
+                    any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+                )
+            } coAnswers {
+                // Leave lands while the coordinator request is in flight.
+                leaveStarted = true
+                connectionFlow.value = RealtimeConnection.Disconnected
+                Failure(Error.GenericError("join rejected"))
+            }
+
+            val result = coordinator().join()
+            advanceUntilIdle()
+
+            assertThat(result).isInstanceOf(Failure::class.java)
+            assertThat(connectionFlow.value).isEqualTo(RealtimeConnection.Disconnected)
+            coVerify(exactly = 1) {
+                apiClient.joinRequest(
+                    any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+                )
+            }
+            verify(exactly = 0) { sessionManager.setActiveSession(null) }
+            verify(exactly = 0) { joinAnalytics.onJoinRequestPermanentError(any(), any(), any()) }
+        }
 
     @Test
     fun `join retries transient errors and gives up after three attempts`() = runTest(
