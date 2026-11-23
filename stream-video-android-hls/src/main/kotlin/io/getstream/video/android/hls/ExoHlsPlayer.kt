@@ -20,6 +20,8 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.view.SurfaceView
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.PlaybackException
@@ -115,7 +117,21 @@ internal class ExoHlsPlayer(
     }
 
     private fun buildPlayer(): ExoPlayer {
-        val player = ExoPlayer.Builder(context).build()
+        val player = ExoPlayer.Builder(context)
+            // An HLS viewer has no WebRTC audio, so the stream takes media audio focus: it pauses
+            // for a phone call and resumes after, and pauses when headphones are unplugged.
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(C.USAGE_MEDIA)
+                    .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
+                    .build(),
+                /* handleAudioFocus = */
+                true,
+            )
+            .setHandleAudioBecomingNoisy(true)
+            // Keeps the CPU and Wi-Fi awake while the stream plays in the background.
+            .setWakeMode(C.WAKE_MODE_NETWORK)
+            .build()
         try {
             player.addListener(
                 ExoHlsPlayerListener(player) { _videoAspectRatio.value = it },

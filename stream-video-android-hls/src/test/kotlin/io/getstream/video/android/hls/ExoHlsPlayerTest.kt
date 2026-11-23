@@ -18,6 +18,7 @@ package io.getstream.video.android.hls
 
 import android.os.Looper
 import android.view.SurfaceView
+import androidx.media3.common.C
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.VideoSize
 import com.google.common.truth.Truth.assertThat
@@ -70,6 +71,15 @@ internal class ExoHlsPlayerTest {
         } finally {
             player.release()
         }
+    }
+
+    @Test
+    fun `the stream plays as media audio`() {
+        player.attach(SurfaceView(application))
+
+        val audioAttributes = player.exoPlayer!!.audioAttributes
+        assertThat(audioAttributes.usage).isEqualTo(C.USAGE_MEDIA)
+        assertThat(audioAttributes.contentType).isEqualTo(C.AUDIO_CONTENT_TYPE_MOVIE)
     }
 
     @Test
