@@ -51,6 +51,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import stream.video.sfu.models.WebsocketReconnectStrategy
 
 /**
@@ -505,11 +506,13 @@ internal class CallJoinCoordinator(
      */
     private fun joinPlayback(playback: PlaybackResponse): Result<RtcSession> {
         val playlistUrl = playback.playlistUrl
+        // Only an absolute https URL is played; a blank or malformed one fails the join.
+        val isHttpsUrl = playlistUrl.toHttpUrlOrNull()?.isHttps == true
         val createPlayer = hlsPlayerFactory()
-        if (playback.type != PlaybackResponse.Type.Hls || playlistUrl.isBlank() || createPlayer == null) {
+        if (playback.type != PlaybackResponse.Type.Hls || !isHttpsUrl || createPlayer == null) {
             logger.e {
                 "[joinInternal] Unsupported playback (type=${playback.type}, " +
-                    "hasUrl=${playback.playlistUrl.isNotBlank()}, hasPlayer=${createPlayer != null})"
+                    "hasHttpsUrl=$isHttpsUrl, hasPlayer=${createPlayer != null})"
             }
             return Failure(Error.GenericError("Unsupported playback type: ${playback.type}"))
         }

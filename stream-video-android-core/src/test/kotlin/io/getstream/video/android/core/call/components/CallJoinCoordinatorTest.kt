@@ -894,6 +894,37 @@ class CallJoinCoordinatorTest {
     }
 
     @Test
+    fun `a playback grant without an absolute https URL fails the join`() = runTest(
+        testDispatcher,
+    ) {
+        val urls = listOf(
+            "",
+            "http://hls.example.com/playlist.m3u8",
+            "/playlist.m3u8",
+            "hls.example.com/playlist.m3u8",
+            "ftp://hls.example.com/playlist.m3u8",
+        )
+        urls.forEach { url ->
+            every { mockJoinResponse.playback } returns PlaybackResponse(
+                playlistUrl = url,
+                reason = PlaybackResponse.Reason.Percentage,
+                type = PlaybackResponse.Type.Hls,
+            )
+            stubJoinCall(Success(mockJoinResponse))
+
+            val result = coordinator().join()
+            advanceUntilIdle()
+
+            assertThat(result).isInstanceOf(Failure::class.java)
+            assertThat(connectionFlow.value).isInstanceOf(RealtimeConnection.Failed::class.java)
+            assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.WebRtc)
+            assertThat(heldPlaybackSession).isNull()
+            assertThat(hlsPlayerFlow.value).isNull()
+        }
+        verify(exactly = 0) { callRegistry.markActive() }
+    }
+
+    @Test
     fun `an HLS grant without a player factory fails the join`() = runTest(testDispatcher) {
         stubHlsPlayback()
 
