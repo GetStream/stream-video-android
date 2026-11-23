@@ -104,6 +104,7 @@ import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.Ingress
 import io.getstream.video.android.core.model.NetworkQuality
@@ -283,6 +284,7 @@ public class CallState(
         it is RealtimeConnection.Reconnecting
     }
 
+    @OptIn(ExperimentalStreamVideoApi::class)
     internal val _playbackType = MutableStateFlow<PlaybackType>(PlaybackType.WebRtc)
 
     /**
@@ -293,6 +295,7 @@ public class CallState(
      *
      * Beta: HLS delivery is enabled per call type by Stream and may change.
      */
+    @ExperimentalStreamVideoApi
     public val playbackType: StateFlow<PlaybackType> = _playbackType
 
     private val internalParticipants = ConcurrentHashMap<SessionId, ParticipantState>()
@@ -1648,6 +1651,7 @@ public class CallState(
         upsertParticipants(participantStates)
     }
 
+    @OptIn(ExperimentalStreamVideoApi::class)
     private fun updateParticipantCounts(
         session: CallSessionResponse? = null,
         sfuHealthCheckEvent: SFUHealthCheckEvent? = null,

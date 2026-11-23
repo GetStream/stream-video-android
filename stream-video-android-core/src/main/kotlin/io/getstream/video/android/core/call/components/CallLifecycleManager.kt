@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalStreamVideoApi::class)
+
 package io.getstream.video.android.core.call.components
 
 import io.getstream.log.taggedLogger
@@ -25,9 +27,11 @@ import io.getstream.video.android.core.SdkCause
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.analytics.call.CallAnalytics
 import io.getstream.video.android.core.call.scope.ScopeProvider
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.model.PlaybackType
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.safeCall
+import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 
 /**
@@ -174,8 +178,11 @@ internal class CallLifecycleManager(
     }
 
     private fun clearPlayback() {
-        val player = sessionManager.hlsPlayer.value
-        sessionManager.hlsPlayer.value = null
+        sessionManager.playbackEndedJob?.cancel()
+        sessionManager.playbackEndedJob = null
+        // Taken atomically: leave and cleanup() both clear playback and may run concurrently, and
+        // only the one that takes the player releases it.
+        val player = sessionManager.hlsPlayer.getAndUpdate { null }
         state._playbackType.value = PlaybackType.WebRtc
         sessionManager.playbackSession?.cleanup()
         sessionManager.playbackSession = null

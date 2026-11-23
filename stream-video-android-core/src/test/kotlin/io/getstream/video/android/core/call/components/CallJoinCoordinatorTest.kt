@@ -25,12 +25,14 @@ import io.getstream.android.video.generated.models.RingCallResponse
 import io.getstream.result.Error
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
+import io.getstream.video.android.core.BackendCause
 import io.getstream.video.android.core.CallJoinInterceptor
 import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.analytics.call.CallAnalytics
+import io.getstream.video.android.core.analytics.call.observer.JoinAnalytics
 import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.base.DispatcherRule
@@ -39,6 +41,7 @@ import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.call.hls.HlsPlayer
 import io.getstream.video.android.core.call.scope.ScopeProvider
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.model.PlaybackType
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -48,6 +51,7 @@ import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
@@ -60,6 +64,8 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.threeten.bp.OffsetDateTime
+import org.threeten.bp.ZoneOffset
 import kotlin.test.assertFailsWith
 
 /**
@@ -69,6 +75,7 @@ import kotlin.test.assertFailsWith
  * apiClient / reconnector / sessionMonitor) and the client-state registrations (via
  * [ClientCallRegistry]) can be stubbed and verified precisely.
  */
+@OptIn(ExperimentalStreamVideoApi::class)
 class CallJoinCoordinatorTest {
 
     private companion object {
@@ -101,6 +108,8 @@ class CallJoinCoordinatorTest {
     private var heldPlaybackSession: RtcSession? = null
     private lateinit var hlsPlayer: HlsPlayer
     private lateinit var hlsPlayerFlow: MutableStateFlow<HlsPlayer?>
+    private lateinit var endedAtFlow: MutableStateFlow<OffsetDateTime?>
+    private var heldPlaybackEndedJob: Job? = null
 
     @Before
     fun setup() {
@@ -140,6 +149,13 @@ class CallJoinCoordinatorTest {
         hlsPlayer = mockk(relaxed = true)
         hlsPlayerFlow = MutableStateFlow(null)
         every { sessionManager.hlsPlayer } returns hlsPlayerFlow
+        endedAtFlow = MutableStateFlow(null)
+        every { state.endedAt } returns endedAtFlow
+        heldPlaybackEndedJob = null
+        every { sessionManager.playbackEndedJob } answers { heldPlaybackEndedJob }
+        every { sessionManager.playbackEndedJob = any() } answers {
+            heldPlaybackEndedJob = firstArg()
+        }
         every { lifecycle.hasLeaveStarted() } returns false
         every { lifecycle.withLeaveLock(any<() -> Any?>()) } answers {
             firstArg<() -> Any?>().invoke()
@@ -172,6 +188,30 @@ class CallJoinCoordinatorTest {
         createPlaybackSession = { playbackSession },
         hlsPlayerFactory = { createHlsPlayer },
     )
+
+    /** Replaces the mocked session manager and lifecycle with real ones sharing the test scope. */
+    private fun useRealLifecycle(): CallSessionManager {
+        val sessions = CallSessionManager()
+        sessionManager = sessions
+        lifecycle = CallLifecycleManager(
+            clientImpl = clientImpl,
+            sessionManager = sessions,
+            scopeProvider = mockk<ScopeProvider>(relaxed = true),
+            callRegistry = callRegistry,
+            shutDownJobs = {},
+            state = state,
+            callAnalytics = callAnalytics,
+            statsReporter = mockk<CallStatsReporter>(relaxed = true),
+            media = media,
+            iceMonitor = mockk<CallIceConnectionMonitor>(relaxed = true),
+            sessionMonitor = { sessionMonitor },
+            connectivityMonitor = { mockk<CallConnectivityMonitor>(relaxed = true) },
+            type = "default",
+            id = "test-call",
+        )
+        every { clientImpl.scope } returns testScope
+        return sessions
+    }
 
     private fun stubJoinCall(result: io.getstream.result.Result<JoinCallResponse>) {
         coEvery {
@@ -301,6 +341,38 @@ class CallJoinCoordinatorTest {
         assertThat(result).isInstanceOf(Failure::class.java)
         assertThat(connectionFlow.value).isInstanceOf(RealtimeConnection.Failed::class.java)
     }
+
+    @Test
+    fun `a join that fails after leave started returns without marking the call failed`() =
+        runTest(testDispatcher) {
+            val joinAnalytics = mockk<JoinAnalytics>(relaxed = true)
+            every { callAnalytics.joinAnalytics } returns joinAnalytics
+            var leaveStarted = false
+            every { lifecycle.hasLeaveStarted() } answers { leaveStarted }
+            coEvery {
+                apiClient.joinRequest(
+                    any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+                )
+            } coAnswers {
+                // Leave lands while the coordinator request is in flight.
+                leaveStarted = true
+                connectionFlow.value = RealtimeConnection.Disconnected
+                Failure(Error.GenericError("join rejected"))
+            }
+
+            val result = coordinator().join()
+            advanceUntilIdle()
+
+            assertThat(result).isInstanceOf(Failure::class.java)
+            assertThat(connectionFlow.value).isEqualTo(RealtimeConnection.Disconnected)
+            coVerify(exactly = 1) {
+                apiClient.joinRequest(
+                    any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+                )
+            }
+            verify(exactly = 0) { sessionManager.setActiveSession(null) }
+            verify(exactly = 0) { joinAnalytics.onJoinRequestPermanentError(any(), any(), any()) }
+        }
 
     @Test
     fun `join retries transient errors and gives up after three attempts`() = runTest(
@@ -881,6 +953,37 @@ class CallJoinCoordinatorTest {
     }
 
     @Test
+    fun `a playback grant without an absolute https URL fails the join`() = runTest(
+        testDispatcher,
+    ) {
+        val urls = listOf(
+            "",
+            "http://hls.example.com/playlist.m3u8",
+            "/playlist.m3u8",
+            "hls.example.com/playlist.m3u8",
+            "ftp://hls.example.com/playlist.m3u8",
+        )
+        urls.forEach { url ->
+            every { mockJoinResponse.playback } returns PlaybackResponse(
+                playlistUrl = url,
+                reason = PlaybackResponse.Reason.Percentage,
+                type = PlaybackResponse.Type.Hls,
+            )
+            stubJoinCall(Success(mockJoinResponse))
+
+            val result = coordinator().join()
+            advanceUntilIdle()
+
+            assertThat(result).isInstanceOf(Failure::class.java)
+            assertThat(connectionFlow.value).isInstanceOf(RealtimeConnection.Failed::class.java)
+            assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.WebRtc)
+            assertThat(heldPlaybackSession).isNull()
+            assertThat(hlsPlayerFlow.value).isNull()
+        }
+        verify(exactly = 0) { callRegistry.markActive() }
+    }
+
+    @Test
     fun `an HLS grant without a player factory fails the join`() = runTest(testDispatcher) {
         stubHlsPlayback()
 
@@ -915,25 +1018,7 @@ class CallJoinCoordinatorTest {
     fun `an HLS grant that arrives after leave does not activate the call`() = runTest(
         testDispatcher,
     ) {
-        val sessions = CallSessionManager()
-        sessionManager = sessions
-        lifecycle = CallLifecycleManager(
-            clientImpl = clientImpl,
-            sessionManager = sessions,
-            scopeProvider = mockk<ScopeProvider>(relaxed = true),
-            callRegistry = callRegistry,
-            shutDownJobs = {},
-            state = state,
-            callAnalytics = callAnalytics,
-            statsReporter = mockk<CallStatsReporter>(relaxed = true),
-            media = media,
-            iceMonitor = mockk<CallIceConnectionMonitor>(relaxed = true),
-            sessionMonitor = { sessionMonitor },
-            connectivityMonitor = { mockk<CallConnectivityMonitor>(relaxed = true) },
-            type = "default",
-            id = "test-call",
-        )
-        every { clientImpl.scope } returns testScope
+        val sessions = useRealLifecycle()
         stubHlsPlayback()
         var requests = 0
         coEvery {
@@ -965,5 +1050,87 @@ class CallJoinCoordinatorTest {
         assertThat(sessions.hlsPlayer.value).isSameInstanceAs(hlsPlayer)
         assertThat(connectionFlow.value).isEqualTo(RealtimeConnection.Connected)
         verify(exactly = 1) { callRegistry.markActive() }
+    }
+
+    @Test
+    fun `the call ending during HLS playback leaves the call`() = runTest(testDispatcher) {
+        stubHlsPlayback()
+
+        coordinator().join()
+        advanceUntilIdle()
+        verify(exactly = 0) { lifecycle.leave(any<CallLeaveReason>()) }
+
+        endedAtFlow.value = OffsetDateTime.of(2026, 1, 2, 0, 0, 0, 0, ZoneOffset.UTC)
+        advanceUntilIdle()
+
+        verify(exactly = 1) {
+            lifecycle.leave(
+                match<CallLeaveReason> {
+                    it is CallLeaveReason.Backend && it.cause == BackendCause.CALL_ENDED_EVENT
+                },
+            )
+        }
+        assertThat(heldPlaybackEndedJob!!.isCompleted).isTrue()
+    }
+
+    @Test
+    fun `an end time already set at HLS join does not leave the call`() = runTest(
+        testDispatcher,
+    ) {
+        val previousEnd = OffsetDateTime.of(2026, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC)
+        endedAtFlow.value = previousEnd
+        stubHlsPlayback()
+
+        coordinator().join()
+        advanceUntilIdle()
+        // A call update that writes the same end time again is not a new end.
+        endedAtFlow.value = null
+        endedAtFlow.value = previousEnd
+        advanceUntilIdle()
+
+        verify(exactly = 0) { lifecycle.leave(any<CallLeaveReason>()) }
+        assertThat(heldPlaybackEndedJob!!.isActive).isTrue()
+    }
+
+    @Test
+    fun `leaving the call stops watching for the end of HLS playback`() = runTest(
+        testDispatcher,
+    ) {
+        val sessions = useRealLifecycle()
+        stubHlsPlayback()
+
+        coordinator().join()
+        advanceUntilIdle()
+        val observer = sessions.playbackEndedJob!!
+        assertThat(observer.isActive).isTrue()
+
+        lifecycle.leave("user")
+        advanceUntilIdle()
+
+        assertThat(observer.isCancelled).isTrue()
+        assertThat(sessions.playbackEndedJob).isNull()
+    }
+
+    @Test
+    fun `a leave while the join waits for the guest token is not reset by that join`() = runTest(
+        testDispatcher,
+    ) {
+        val sessions = useRealLifecycle()
+        stubHlsPlayback()
+        val guestGate = CompletableDeferred<Unit>()
+        every { clientImpl.guestUserJob } returns testScope.async { guestGate.await() }
+
+        val join = async { coordinator().join() }
+        advanceUntilIdle()
+        lifecycle.leave("user")
+        guestGate.complete(Unit)
+        advanceUntilIdle()
+
+        assertThat(join.await()).isInstanceOf(Failure::class.java)
+        assertThat(lifecycle.hasLeaveStarted()).isTrue()
+        assertThat(sessions.playbackSession).isNull()
+        assertThat(sessions.hlsPlayer.value).isNull()
+        assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.WebRtc)
+        verify(exactly = 0) { callRegistry.markActive() }
     }
 }

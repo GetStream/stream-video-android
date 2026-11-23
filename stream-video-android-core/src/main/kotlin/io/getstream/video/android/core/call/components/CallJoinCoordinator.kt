@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalStreamVideoApi::class)
+
 package io.getstream.video.android.core.call.components
 
 import io.getstream.android.video.generated.models.JoinCallResponse
@@ -40,6 +42,7 @@ import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.call.hls.HlsPlayer
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.model.PlaybackType
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.ringing.RingJoinSource
@@ -51,6 +54,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import stream.video.sfu.models.WebsocketReconnectStrategy
 
 /**
@@ -236,6 +240,10 @@ internal class CallJoinCoordinator(
             return Success(existing)
         }
 
+        // Before any suspend: a leave that lands while this join waits (guest token, audio
+        // factory, coordinator request) must stay visible to the checks below, not be reset.
+        lifecycle.resetLeaveGuard()
+
         // Live-select before any suspend so coalesced waiters and SFU observers see the
         // first non-cancelled waiter's interceptor, not a stale leader after Activity death.
         syncCallJoinInterceptor()
@@ -274,7 +282,6 @@ internal class CallJoinCoordinator(
 
         var result: Result<RtcSession>
 
-        lifecycle.resetLeaveGuard()
         while (retryCount < 3) {
             result = joinInternal(
                 create,
@@ -505,11 +512,13 @@ internal class CallJoinCoordinator(
      */
     private fun joinPlayback(playback: PlaybackResponse): Result<RtcSession> {
         val playlistUrl = playback.playlistUrl
+        // Only an absolute https URL is played; a blank or malformed one fails the join.
+        val isHttpsUrl = playlistUrl.toHttpUrlOrNull()?.isHttps == true
         val createPlayer = hlsPlayerFactory()
-        if (playback.type != PlaybackResponse.Type.Hls || playlistUrl.isBlank() || createPlayer == null) {
+        if (playback.type != PlaybackResponse.Type.Hls || !isHttpsUrl || createPlayer == null) {
             logger.e {
                 "[joinInternal] Unsupported playback (type=${playback.type}, " +
-                    "hasUrl=${playback.playlistUrl.isNotBlank()}, hasPlayer=${createPlayer != null})"
+                    "hasHttpsUrl=$isHttpsUrl, hasPlayer=${createPlayer != null})"
             }
             return Failure(Error.GenericError("Unsupported playback type: ${playback.type}"))
         }
@@ -540,7 +549,29 @@ internal class CallJoinCoordinator(
             state._connection.value = RealtimeConnection.Joined(session)
             callRegistry.markActive()
             state._connection.value = RealtimeConnection.Connected
+            observePlaybackEnded()
             Success(session)
+        }
+    }
+
+    /**
+     * Leaves the call once it ends while joined over HLS. With no SFU there is no SFU call-ended
+     * event, so a missed coordinator `call.ended` event would keep the viewer connected. Call
+     * updates also set [CallState.endedAt], so any new value counts; one already set at join
+     * does not. Cancelled when playback is cleared, and leave runs only once, so this never
+     * leaves a second time after `call.ended`.
+     */
+    private fun observePlaybackEnded() {
+        val endedAtOnJoin = state.endedAt.value
+        sessionManager.playbackEndedJob = scope.launch {
+            state.endedAt.first { it != null && it != endedAtOnJoin }
+            logger.i { "[joinPlayback] Call ended during HLS playback — leaving" }
+            lifecycle.leave(
+                CallLeaveReason.Backend(
+                    cause = BackendCause.CALL_ENDED_EVENT,
+                    message = "call-ended-during-hls-playback",
+                ),
+            )
         }
     }
 
