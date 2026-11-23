@@ -123,6 +123,30 @@ internal class ExoHlsPlayerTest {
     }
 
     @Test
+    fun `audio toggled from another thread applies on the main thread`() {
+        player.attach(SurfaceView(application))
+
+        thread { player.setAudioEnabled(false) }.join()
+        assertThat(player.exoPlayer!!.volume).isEqualTo(1f)
+        shadowOf(Looper.getMainLooper()).idle()
+        assertThat(player.exoPlayer!!.volume).isEqualTo(0f)
+
+        thread { player.setAudioEnabled(true) }.join()
+        shadowOf(Looper.getMainLooper()).idle()
+        assertThat(player.exoPlayer!!.volume).isEqualTo(1f)
+    }
+
+    @Test
+    fun `audio muted from another thread before the first attach applies to the new exoplayer`() {
+        thread { player.setAudioEnabled(false) }.join()
+        shadowOf(Looper.getMainLooper()).idle()
+
+        player.attach(SurfaceView(application))
+
+        assertThat(player.exoPlayer!!.volume).isEqualTo(0f)
+    }
+
+    @Test
     fun `release from another thread runs on the main thread and ends playback`() {
         val surface = SurfaceView(application)
         player.attach(surface)

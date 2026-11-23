@@ -96,15 +96,21 @@ internal class ExoHlsPlayer(
     }
 
     override fun setAudioEnabled(enabled: Boolean) {
-        audioEnabled = enabled
-        player?.volume = volumeFor(enabled)
+        runOnMain {
+            audioEnabled = enabled
+            player?.volume = volumeFor(enabled)
+        }
     }
 
     override fun release() {
+        runOnMain(::releaseOnMain)
+    }
+
+    private fun runOnMain(block: () -> Unit) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            releaseOnMain()
+            block()
         } else {
-            mainHandler.post(::releaseOnMain)
+            mainHandler.post(block)
         }
     }
 
