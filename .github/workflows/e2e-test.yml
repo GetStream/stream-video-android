@@ -43,7 +43,7 @@ jobs:
       contents: read
       pull-requests: read
     name: Launch Allure TestOps
-    runs-on: ubuntu-24.04
+    runs-on: { group: github-public-amd64 }
     needs: build-compose-apks
     outputs:
       launch_id: ${{ env.LAUNCH_ID }}
@@ -60,7 +60,7 @@ jobs:
       contents: read
       pull-requests: read
     name: Test compose
-    runs-on: ubuntu-24.04
+    runs-on: { group: github-public-amd64 }
     needs:
       - build-compose-apks
       - allure_testops_launch
@@ -125,7 +125,7 @@ jobs:
   # protection.
   e2e-result:
     name: E2E result
-    runs-on: ubuntu-24.04
+    runs-on: { group: github-public-amd64 }
     if: ${{ always() }}
     needs:
       - build-compose-apks
