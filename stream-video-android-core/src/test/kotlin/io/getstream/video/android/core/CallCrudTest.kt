@@ -104,8 +104,9 @@ public class CallCrudTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `Create a call ignores a member role the user can't grant`() = runTest {
-        val call = client.call("default", randomUUID())
+    fun `Create a call with different member roles`() = runTest {
+        // On livestream calls the creator may set member roles; on default calls only admins can.
+        val call = client.call("livestream", randomUUID())
 
         val result = call.create(
             members = listOf(
@@ -122,8 +123,7 @@ public class CallCrudTest : IntegrationTestBase() {
         val memberStateItem = memberState.awaitItem()
 
         assertThat(customStateItem["color"]).isEqualTo("red")
-        // The test user can't set member roles, so the backend drops the requested one.
-        assertThat(memberStateItem.first().role).isNotEqualTo("host")
+        assertThat(memberStateItem.first().role).isEqualTo("host")
         assertThat(memberStateItem).hasSize(1)
     }
 
