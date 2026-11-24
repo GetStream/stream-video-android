@@ -29,4 +29,5 @@ jobs:
       BUILD_CACHE_AWS_BUCKET: ${{ secrets.BUILD_CACHE_AWS_BUCKET }}
       BUILD_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.BUILD_CACHE_AWS_ACCESS_KEY_ID }}
       BUILD_CACHE_AWS_SECRET_KEY: ${{ secrets.BUILD_CACHE_AWS_SECRET_KEY }}
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      # SonarCloud can't read pull requests from GitHub, so the shared workflow skips Sonar on them without a token.
+      SONAR_TOKEN: ${{ github.event_name != 'pull_request' && secrets.SONAR_TOKEN || '' }}
