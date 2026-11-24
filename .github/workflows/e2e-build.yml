@@ -57,8 +57,7 @@ jobs:
     permissions:
       actions: write
     name: Remove older Gradle caches
-    runs-on:
-      group: github-public-ubuntu-static
+    runs-on: { group: github-public-amd64 }
     steps:
       # A failed save only warns, so the older snapshots stay unless the new one is listed.
       - name: Remove older Gradle caches
