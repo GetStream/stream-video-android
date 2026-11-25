@@ -3,6 +3,12 @@ name: E2E Tests
 on:
   pull_request:
   merge_group:
+  # Also saves the Gradle cache that pull requests restore, so it comes from the latest merge.
+  push:
+    branches:
+      - develop
+    paths-ignore:
+      - '**/*.md'
 
   workflow_dispatch:
     inputs:
@@ -17,8 +23,9 @@ on:
         required: false
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+  # A develop run finishes and saves the cache; only the newest pending push waits behind it.
+  cancel-in-progress: ${{ github.event_name != 'push' }}
 
 env:
   BUILD_CACHE_AWS_REGION: ${{ secrets.BUILD_CACHE_AWS_REGION }}
@@ -43,7 +50,7 @@ jobs:
       contents: read
       pull-requests: read
     name: Launch Allure TestOps
-    runs-on: ubuntu-24.04
+    runs-on: { group: github-public-amd64 }
     needs: build-compose-apks
     outputs:
       launch_id: ${{ env.LAUNCH_ID }}
@@ -60,7 +67,7 @@ jobs:
       contents: read
       pull-requests: read
     name: Test compose
-    runs-on: ubuntu-24.04
+    runs-on: { group: github-public-amd64 }
     needs:
       - build-compose-apks
       - allure_testops_launch
@@ -125,7 +132,7 @@ jobs:
   # protection.
   e2e-result:
     name: E2E result
-    runs-on: ubuntu-24.04
+    runs-on: { group: github-public-amd64 }
     if: ${{ always() }}
     needs:
       - build-compose-apks
