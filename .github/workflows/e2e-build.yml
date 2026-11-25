@@ -13,13 +13,13 @@ jobs:
       actions: write
       contents: read
     name: compose apks
-    runs-on: ubuntu-24.04
+    runs-on: { group: github-public-amd64 }
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: GetStream/android-ci-actions/actions/setup-java@cb46e4f44d105a68738bfd2a1cfd156bb768665b
       - uses: GetStream/android-ci-actions/actions/enable-kvm@cb46e4f44d105a68738bfd2a1cfd156bb768665b
       - uses: GetStream/android-ci-actions/actions/setup-ruby@cb46e4f44d105a68738bfd2a1cfd156bb768665b
-      # Pull requests and the merge queue restore the latest cache; scheduled and manual runs save a new one.
+      # Only pushes to develop save a new cache; every other run restores the latest one.
       - name: Restore Gradle cache
         id: gradle_cache
         uses: actions/cache/restore@v4
@@ -34,24 +34,13 @@ jobs:
         run: bundle exec fastlane build_e2e_test
         timeout-minutes: 30
       - name: Save Gradle cache
-        if: ${{ github.event_name != 'pull_request' && github.event_name != 'merge_group' }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
         uses: actions/cache/save@v4
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
           key: ${{ steps.gradle_cache.outputs.cache-primary-key }}
-      # Keeps one snapshot per branch, so the nightly saves don't pile up in the repo's Actions cache.
-      # A failed save only warns, so the older snapshots stay unless the new one is listed.
-      - name: Remove older Gradle caches
-        if: ${{ github.event_name != 'pull_request' && github.event_name != 'merge_group' }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-          NEW_KEY: ${{ steps.gradle_cache.outputs.cache-primary-key }}
-        run: |
-          gh cache list -R "$GITHUB_REPOSITORY" --ref "$GITHUB_REF" --key "${{ runner.os }}-gradle-e2e-" --limit 100 --json id,key \
-            --jq 'if any(.[]; .key == env.NEW_KEY) then .[] | select(.key != env.NEW_KEY) | .id else empty end' \
-            | xargs -r -n1 gh cache delete -R "$GITHUB_REPOSITORY"
       - name: Upload apks
         uses: actions/upload-artifact@v7
         with:
@@ -59,3 +48,23 @@ jobs:
           path: |
             demo-app/build/outputs/apk/e2etesting/debug/*.apk
             demo-app/build/outputs/apk/androidTest/e2etesting/debug/*.apk
+
+  # Keeps one snapshot, so the saves don't pile up in the repo's Actions cache.
+  # Calls the GitHub API, and the org IP allow list only admits static-IP runners.
+  remove-older-gradle-caches:
+    needs: build
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
+    permissions:
+      actions: write
+    name: Remove older Gradle caches
+    runs-on: { group: github-public-amd64 }
+    steps:
+      # A failed save only warns, so the older snapshots stay unless the new one is listed.
+      - name: Remove older Gradle caches
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NEW_KEY: ${{ runner.os }}-gradle-e2e-${{ github.run_id }}
+        run: |
+          gh cache list -R "$GITHUB_REPOSITORY" --ref "$GITHUB_REF" --key "${{ runner.os }}-gradle-e2e-" --limit 100 --json id,key \
+            --jq 'if any(.[]; .key == env.NEW_KEY) then .[] | select(.key != env.NEW_KEY) | .id else empty end' \
+            | xargs -r -n1 gh cache delete -R "$GITHUB_REPOSITORY"
