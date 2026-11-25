@@ -16,18 +16,24 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Develop runs finish so they save the Gradle caches; a newer push only replaces a queued one.
+  cancel-in-progress: ${{ github.event_name != 'push' }}
 
 jobs:
   base-android-ci:
     permissions:
       contents: read
       pull-requests: read
-    uses: GetStream/stream-build-conventions-android/.github/workflows/android-ci.yml@75cf8105224a5fb02ad06fb4cc52b1a45a71d440 # v1.3.1
+    uses: GetStream/stream-build-conventions-android/.github/workflows/android-ci.yml@f1669c081bca009a0aa0978561096d32bfd156df # v1.4.0
+    with:
+      save-gradle-cache: true
     secrets:
-      BUILD_CACHE_AWS_REGION: ${{ secrets.BUILD_CACHE_AWS_REGION }}
-      BUILD_CACHE_AWS_BUCKET: ${{ secrets.BUILD_CACHE_AWS_BUCKET }}
-      BUILD_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.BUILD_CACHE_AWS_ACCESS_KEY_ID }}
-      BUILD_CACHE_AWS_SECRET_KEY: ${{ secrets.BUILD_CACHE_AWS_SECRET_KEY }}
-      # SonarCloud can't read pull requests from GitHub, so the shared workflow skips Sonar on them without a token.
+      # Pull requests don't get the token: Sonar analysis of them fails in our SonarCloud setup.
       SONAR_TOKEN: ${{ github.event_name != 'pull_request' && secrets.SONAR_TOKEN || '' }}
+
+  remove-older-gradle-caches:
+    needs: base-android-ci
+    if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
+    permissions:
+      actions: write
+    uses: GetStream/stream-build-conventions-android/.github/workflows/gradle-cache-cleanup.yml@f1669c081bca009a0aa0978561096d32bfd156df # v1.4.0
