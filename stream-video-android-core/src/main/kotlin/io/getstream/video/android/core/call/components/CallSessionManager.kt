@@ -75,7 +75,7 @@ internal class CallSessionManager() {
     /** The call's HLS player. Set and cleared together with [playbackSession]. */
     val hlsPlayer = MutableStateFlow<HlsPlayer?>(null)
 
-    /** Reports [hlsPlayer] playback to `hls_stats`, when the backend enabled HLS stats. */
+    /** Reports [hlsPlayer] playback to `hls_stats`, unless HLS stats are turned off. */
     @Volatile
     var hlsStatsReporter: HlsStatsReporter? = null
 

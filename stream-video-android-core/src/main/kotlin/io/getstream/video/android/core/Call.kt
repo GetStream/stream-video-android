@@ -577,7 +577,11 @@ public class Call(
             }
         },
         createHlsStatsReporter = { player, joinResponse ->
-            HlsStatsConfig.from(joinResponse, sessionManager.unifiedSessionId)?.let { config ->
+            HlsStatsConfig.from(
+                response = joinResponse,
+                unifiedSessionId = sessionManager.unifiedSessionId,
+                statsReportingEnabled = clientImpl.enableStatsCollection,
+            )?.let { config ->
                 HlsStatsReporter(
                     config = config,
                     player = player,

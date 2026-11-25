@@ -41,9 +41,20 @@ class HlsStatsConfigTest {
     }
 
     @Test
-    fun `is null unless HLS stats are enabled`() {
-        assertThat(HlsStatsConfig.from(response(enabled = null), "unified")).isNull()
+    fun `is null when the backend turns HLS stats off`() {
         assertThat(HlsStatsConfig.from(response(enabled = false), "unified")).isNull()
+    }
+
+    @Test
+    fun `reports when the backend does not send enable_hls_stats`() {
+        assertThat(HlsStatsConfig.from(response(enabled = null), "unified")).isNotNull()
+    }
+
+    @Test
+    fun `is null when the app turned stats reporting off`() {
+        assertThat(
+            HlsStatsConfig.from(response(), "unified", statsReportingEnabled = false),
+        ).isNull()
     }
 
     @Test

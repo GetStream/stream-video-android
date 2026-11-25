@@ -48,12 +48,18 @@ internal class HlsStatsConfig(
         const val DEFAULT_INTERVAL_MS = 10_000L
 
         /**
-         * Returns null, so no reports are sent, unless the backend enabled HLS stats and signed a
-         * stats token for this call session.
+         * Returns null, so no reports are sent, when the app turned stats reporting off, the
+         * backend sent `enable_hls_stats: false`, or the response has no stats token or call
+         * session. A missing `enable_hls_stats` does not stop reporting.
          */
-        fun from(response: JoinCallResponse, unifiedSessionId: String): HlsStatsConfig? {
+        fun from(
+            response: JoinCallResponse,
+            unifiedSessionId: String,
+            statsReportingEnabled: Boolean = true,
+        ): HlsStatsConfig? {
+            if (!statsReportingEnabled) return null
             val options = response.statsOptions
-            if (options.enableHlsStats != true) return null
+            if (options.enableHlsStats == false) return null
             val statsToken = response.playback?.statsToken?.takeIf { it.isNotBlank() } ?: return null
             val callSessionId = response.call.currentSessionId.takeIf { it.isNotBlank() } ?: return null
             val intervalMs = options.reportingHlsIntervalMs?.takeIf { it > 0 }

@@ -85,8 +85,8 @@ internal class CallJoinCoordinator(
     // Returns the builder of the call's HLS player from a playlist URL, read at join time. Null
     // when the app registered no HlsPlayerFactory: the join then never asks for HLS.
     private val hlsPlayerFactory: () -> ((playlistUrl: String) -> HlsPlayer)? = { null },
-    // Builds the reporter of the HLS player's stats, or null when the join response did not
-    // enable HLS stats.
+    // Builds the reporter of the HLS player's stats, or null when HLS stats are turned off, see
+    // HlsStatsConfig.from.
     private val createHlsStatsReporter: (HlsPlayer, JoinCallResponse) -> HlsStatsReporter? =
         { _, _ -> null },
 ) {
