@@ -53,6 +53,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -575,16 +576,17 @@ internal class CallJoinCoordinator(
     }
 
     /**
-     * Leaves the call once it ends while joined over HLS. With no SFU there is no SFU call-ended
-     * event, so a missed coordinator `call.ended` event would keep the viewer connected. Call
-     * updates also set [CallState.endedAt], so any new value counts; one already set at join
-     * does not. Cancelled when playback is cleared, and leave runs only once, so this never
-     * leaves a second time after `call.ended`.
+     * Leaves the call once its session ends while joined over HLS. With no SFU there is no SFU
+     * call-ended event, so a missed coordinator `call.ended` event would keep the viewer
+     * connected. Reads the session's end time rather than [CallState.endedAt], which is also
+     * set when the host goes back to backstage: like WebRTC viewers, HLS viewers stay then. An
+     * end time already set at join does not count. Cancelled when playback is cleared, and leave
+     * runs only once, so this never leaves a second time after `call.ended`.
      */
     private fun observePlaybackEnded() {
-        val endedAtOnJoin = state.endedAt.value
+        val endedAtOnJoin = state.session.value?.endedAt
         sessionManager.playbackEndedJob = scope.launch {
-            state.endedAt.first { it != null && it != endedAtOnJoin }
+            state.session.map { it?.endedAt }.first { it != null && it != endedAtOnJoin }
             logger.i { "[joinPlayback] Call ended during HLS playback — leaving" }
             lifecycle.leave(
                 CallLeaveReason.Backend(

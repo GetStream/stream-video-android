@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.call.components
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.android.video.generated.models.CallSessionResponse
 import io.getstream.android.video.generated.models.CallSettingsResponse
 import io.getstream.android.video.generated.models.JoinCallResponse
 import io.getstream.android.video.generated.models.PlaybackResponse
@@ -109,7 +110,7 @@ class CallJoinCoordinatorTest {
     private var heldPlaybackSession: RtcSession? = null
     private lateinit var hlsPlayer: HlsPlayer
     private lateinit var hlsPlayerFlow: MutableStateFlow<HlsPlayer?>
-    private lateinit var endedAtFlow: MutableStateFlow<OffsetDateTime?>
+    private lateinit var callSessionFlow: MutableStateFlow<CallSessionResponse?>
     private var heldPlaybackEndedJob: Job? = null
 
     @Before
@@ -150,8 +151,8 @@ class CallJoinCoordinatorTest {
         hlsPlayer = mockk(relaxed = true)
         hlsPlayerFlow = MutableStateFlow(null)
         every { sessionManager.hlsPlayer } returns hlsPlayerFlow
-        endedAtFlow = MutableStateFlow(null)
-        every { state.endedAt } returns endedAtFlow
+        callSessionFlow = MutableStateFlow(null)
+        every { state.session } returns callSessionFlow
         heldPlaybackEndedJob = null
         every { sessionManager.playbackEndedJob } answers { heldPlaybackEndedJob }
         every { sessionManager.playbackEndedJob = any() } answers {
@@ -1118,7 +1119,7 @@ class CallJoinCoordinatorTest {
         advanceUntilIdle()
         verify(exactly = 0) { lifecycle.leave(any<CallLeaveReason>()) }
 
-        endedAtFlow.value = OffsetDateTime.of(2026, 1, 2, 0, 0, 0, 0, ZoneOffset.UTC)
+        callSessionFlow.value = callSession(endedAt = OffsetDateTime.of(2026, 1, 2, 0, 0, 0, 0, ZoneOffset.UTC))
         advanceUntilIdle()
 
         verify(exactly = 1) {
@@ -1136,14 +1137,31 @@ class CallJoinCoordinatorTest {
         testDispatcher,
     ) {
         val previousEnd = OffsetDateTime.of(2026, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC)
-        endedAtFlow.value = previousEnd
+        callSessionFlow.value = callSession(endedAt = previousEnd)
         stubHlsPlayback()
 
         coordinator().join()
         advanceUntilIdle()
         // A call update that writes the same end time again is not a new end.
-        endedAtFlow.value = null
-        endedAtFlow.value = previousEnd
+        callSessionFlow.value = callSession()
+        callSessionFlow.value = callSession(endedAt = previousEnd)
+        advanceUntilIdle()
+
+        verify(exactly = 0) { lifecycle.leave(any<CallLeaveReason>()) }
+        assertThat(heldPlaybackEndedJob!!.isActive).isTrue()
+    }
+
+    @Test
+    fun `the host going back to backstage does not leave an HLS viewer`() = runTest(
+        testDispatcher,
+    ) {
+        stubHlsPlayback()
+
+        coordinator().join()
+        advanceUntilIdle()
+        callSessionFlow.value = callSession(
+            liveEndedAt = OffsetDateTime.of(2026, 1, 2, 0, 0, 0, 0, ZoneOffset.UTC),
+        )
         advanceUntilIdle()
 
         verify(exactly = 0) { lifecycle.leave(any<CallLeaveReason>()) }
@@ -1190,5 +1208,13 @@ class CallJoinCoordinatorTest {
         assertThat(sessions.hlsPlayer.value).isNull()
         assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.WebRtc)
         verify(exactly = 0) { callRegistry.markActive() }
+    }
+
+    private fun callSession(
+        endedAt: OffsetDateTime? = null,
+        liveEndedAt: OffsetDateTime? = null,
+    ): CallSessionResponse = mockk(relaxed = true) {
+        every { this@mockk.endedAt } returns endedAt
+        every { this@mockk.liveEndedAt } returns liveEndedAt
     }
 }

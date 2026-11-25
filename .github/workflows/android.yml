@@ -23,10 +23,11 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
-    uses: GetStream/stream-build-conventions-android/.github/workflows/android-ci.yml@500ef3b1a9a1823213f37cf269ef409042f7c7d2 # v1.2.0
+    uses: GetStream/stream-build-conventions-android/.github/workflows/android-ci.yml@75cf8105224a5fb02ad06fb4cc52b1a45a71d440 # v1.3.1
     secrets:
       BUILD_CACHE_AWS_REGION: ${{ secrets.BUILD_CACHE_AWS_REGION }}
       BUILD_CACHE_AWS_BUCKET: ${{ secrets.BUILD_CACHE_AWS_BUCKET }}
       BUILD_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.BUILD_CACHE_AWS_ACCESS_KEY_ID }}
       BUILD_CACHE_AWS_SECRET_KEY: ${{ secrets.BUILD_CACHE_AWS_SECRET_KEY }}
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      # SonarCloud can't read pull requests from GitHub, so the shared workflow skips Sonar on them without a token.
+      SONAR_TOKEN: ${{ github.event_name != 'pull_request' && secrets.SONAR_TOKEN || '' }}
