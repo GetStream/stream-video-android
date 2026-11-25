@@ -24,7 +24,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
-    uses: GetStream/stream-build-conventions-android/.github/workflows/android-ci.yml@f1669c081bca009a0aa0978561096d32bfd156df # v1.4.0
+    uses: GetStream/stream-build-conventions-android/.github/workflows/android-ci.yml@1cd380813bf538015e9067f3a9b4e26f1616c2fa # TEMP test
     with:
       save-gradle-cache: true
     secrets:
@@ -33,7 +33,7 @@ jobs:
 
   remove-older-gradle-caches:
     needs: base-android-ci
-    if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
+    if: ${{ !cancelled() }} # TEMP test
     permissions:
       actions: write
-    uses: GetStream/stream-build-conventions-android/.github/workflows/gradle-cache-cleanup.yml@f1669c081bca009a0aa0978561096d32bfd156df # v1.4.0
+    uses: GetStream/stream-build-conventions-android/.github/workflows/gradle-cache-cleanup.yml@1cd380813bf538015e9067f3a9b4e26f1616c2fa # TEMP test
