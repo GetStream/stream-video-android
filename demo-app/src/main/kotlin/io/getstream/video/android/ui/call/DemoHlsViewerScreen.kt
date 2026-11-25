@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
 import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayerOverlay
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.hls.HlsVideoRenderer
 
 /**
@@ -39,6 +40,7 @@ import io.getstream.video.android.hls.HlsVideoRenderer
  * the WebRTC livestream player (live badge, participant count, duration and a mute toggle), plus a
  * leave button.
  */
+@OptIn(ExperimentalStreamVideoApi::class)
 @Composable
 fun DemoHlsViewerScreen(
     call: Call,

@@ -20,6 +20,7 @@ import android.content.Context
 import android.view.SurfaceView
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideoBuilder
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -27,14 +28,16 @@ import kotlinx.coroutines.flow.StateFlow
  *
  * The call owns its player: one is created when the backend serves the call as HLS, and it is
  * released when the call is left. Joining alone plays nothing: playback, including audio, starts
- * at the first [attach]. From then on it continues while no renderer is shown, the same as a
- * WebRTC call, and a renderer that is recreated, for example on rotation, shows the same player.
+ * when the call's renderer from `stream-video-android-hls` is first shown. From then on it
+ * continues while no renderer is shown, the same as a WebRTC call, and a renderer that is
+ * recreated, for example on rotation, shows the same player.
  *
  * The player draws to one surface at a time: showing the same call in two renderers at once is
  * not supported.
  *
  * Beta: HLS delivery is enabled per call type by Stream and may change.
  */
+@ExperimentalStreamVideoApi
 public interface HlsPlayer {
 
     public val playlistUrl: String
@@ -45,7 +48,10 @@ public interface HlsPlayer {
      */
     public val videoAspectRatio: StateFlow<Float?>
 
-    /** Draws the broadcast on [surfaceView], starting playback if needed. Main thread only. */
+    /**
+     * Draws the broadcast on [surfaceView], starting playback if needed. Called by the renderer.
+     * Main thread only.
+     */
     public fun attach(surfaceView: SurfaceView)
 
     /**
@@ -136,7 +142,13 @@ public class HlsPlaybackMetrics(
  * and every call joins over WebRTC.
  *
  * The `stream-video-android-hls` artifact provides the ExoPlayer implementation.
+ *
+ * Beta: HLS delivery is enabled per call type by Stream and may change.
  */
+// Not marked experimental itself: StreamVideoBuilder takes it, and a type in a constructor's
+// signature would make every StreamVideoBuilder call need the opt-in. Implementing it needs the
+// opt-in anyway, since it returns an HlsPlayer.
+@OptIn(ExperimentalStreamVideoApi::class)
 public fun interface HlsPlayerFactory {
 
     /**

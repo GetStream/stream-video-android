@@ -20,10 +20,11 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.view.SurfaceView
-import androidx.annotation.OptIn
+import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.Format
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MimeTypes
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.VideoSize
@@ -36,6 +37,7 @@ import io.getstream.video.android.core.call.hls.HlsPlaybackMetrics
 import io.getstream.video.android.core.call.hls.HlsPlaybackState
 import io.getstream.video.android.core.call.hls.HlsPlayer
 import io.getstream.video.android.core.call.hls.HlsPlayerFactory
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -54,6 +56,7 @@ import kotlinx.coroutines.flow.asStateFlow
  * ).build()
  * ```
  */
+@ExperimentalStreamVideoApi
 public class ExoHlsPlayerFactory : HlsPlayerFactory {
 
     override fun create(context: Context, playlistUrl: String): HlsPlayer =
@@ -64,6 +67,7 @@ public class ExoHlsPlayerFactory : HlsPlayerFactory {
  * [HlsPlayer] backed by ExoPlayer. ExoPlayer is bound to the thread that builds it, so it is built
  * on the main thread at the first [attach] rather than when the call joins.
  */
+@OptIn(ExperimentalStreamVideoApi::class)
 internal class ExoHlsPlayer(
     private val context: Context,
     override val playlistUrl: String,
@@ -106,20 +110,24 @@ internal class ExoHlsPlayer(
     }
 
     override fun setAudioEnabled(enabled: Boolean) {
-        audioEnabled = enabled
-        player?.volume = volumeFor(enabled)
+        runOnMain {
+            audioEnabled = enabled
+            player?.volume = volumeFor(enabled)
+        }
     }
 
-    override fun release() = onMain(::releaseOnMain)
+    override fun release() {
+        runOnMain(::releaseOnMain)
+    }
 
-    override fun setPlaybackListener(listener: HlsPlaybackListener?) = onMain {
-        if (released) return@onMain
+    override fun setPlaybackListener(listener: HlsPlaybackListener?) = runOnMain {
+        if (released) return@runOnMain
         playbackListener = listener
         reportedState = null
         player?.let(::reportState)
     }
 
-    @OptIn(UnstableApi::class)
+    @androidx.annotation.OptIn(UnstableApi::class)
     override fun readPlaybackMetrics(): HlsPlaybackMetrics? {
         val player = player ?: return null
         val format = player.videoFormat
@@ -134,8 +142,12 @@ internal class ExoHlsPlayer(
         )
     }
 
-    private fun onMain(block: () -> Unit) {
-        if (Looper.myLooper() == Looper.getMainLooper()) block() else mainHandler.post(block)
+    private fun runOnMain(block: () -> Unit) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            block()
+        } else {
+            mainHandler.post(block)
+        }
     }
 
     private fun releaseOnMain() {
@@ -165,14 +177,27 @@ internal class ExoHlsPlayer(
     }
 
     private fun buildPlayer(): ExoPlayer {
-        val player = ExoPlayer.Builder(context).build()
+        val player = ExoPlayer.Builder(context)
+            // An HLS viewer has no WebRTC audio, so the stream takes media audio focus: it pauses
+            // for a phone call and resumes after, and pauses when headphones are unplugged.
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(C.USAGE_MEDIA)
+                    .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
+                    .build(),
+                /* handleAudioFocus = */
+                true,
+            )
+            .setHandleAudioBecomingNoisy(true)
+            // Keeps the CPU and Wi-Fi awake while the stream plays in the background.
+            .setWakeMode(C.WAKE_MODE_NETWORK)
+            .build()
         try {
             player.addListener(
+                ExoHlsPlayerListener(player) { _videoAspectRatio.value = it },
+            )
+            player.addListener(
                 object : Player.Listener {
-                    override fun onVideoSizeChanged(videoSize: VideoSize) {
-                        videoAspectRatioOf(videoSize)?.let { _videoAspectRatio.value = it }
-                    }
-
                     override fun onPositionDiscontinuity(
                         oldPosition: Player.PositionInfo,
                         newPosition: Player.PositionInfo,
@@ -209,7 +234,13 @@ internal class ExoHlsPlayer(
                 },
             )
             player.volume = volumeFor(audioEnabled)
-            player.setMediaItem(MediaItem.fromUri(playlistUrl))
+            // Set the MIME type so playlist URLs without an .m3u8 extension still play as HLS.
+            player.setMediaItem(
+                MediaItem.Builder()
+                    .setUri(playlistUrl)
+                    .setMimeType(MimeTypes.APPLICATION_M3U8)
+                    .build(),
+            )
             player.prepare()
         } catch (error: Throwable) {
             player.release()
@@ -244,6 +275,28 @@ internal fun hlsPlaybackStateOf(
     }
     // Ready with playWhenReady set but not playing: playback is suppressed, e.g. by audio focus.
     else -> HlsPlaybackState.Paused
+}
+
+/**
+ * Publishes the stream's aspect ratio and rejoins the live edge when playback falls behind the
+ * live window. Other errors are left to the player's default handling.
+ */
+internal class ExoHlsPlayerListener(
+    private val player: Player,
+    private val onVideoAspectRatio: (Float) -> Unit,
+) : Player.Listener {
+
+    override fun onVideoSizeChanged(videoSize: VideoSize) {
+        videoAspectRatioOf(videoSize)?.let(onVideoAspectRatio)
+    }
+
+    override fun onPlayerError(error: PlaybackException) {
+        // The live window moved past the playback position, e.g. after a stall or a long pause.
+        if (error.errorCode == PlaybackException.ERROR_CODE_BEHIND_LIVE_WINDOW) {
+            player.seekToDefaultPosition()
+            player.prepare()
+        }
+    }
 }
 
 /** Display aspect ratio of [videoSize], accounting for non-square pixels. Null while unknown. */

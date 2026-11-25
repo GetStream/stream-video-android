@@ -18,11 +18,14 @@ package io.getstream.video.android.hls
 
 import android.os.Looper
 import android.view.SurfaceView
+import androidx.media3.common.C
+import androidx.media3.common.MimeTypes
 import androidx.media3.common.Player
 import androidx.media3.common.VideoSize
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.call.hls.HlsPlaybackListener
 import io.getstream.video.android.core.call.hls.HlsPlaybackState
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,6 +37,7 @@ import kotlin.concurrent.thread
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33])
+@OptIn(ExperimentalStreamVideoApi::class)
 internal class ExoHlsPlayerTest {
 
     private companion object {
@@ -57,6 +61,30 @@ internal class ExoHlsPlayerTest {
         val exoPlayer = player.exoPlayer!!
         assertThat(exoPlayer.currentMediaItem?.localConfiguration?.uri.toString()).isEqualTo(URL)
         assertThat(exoPlayer.playWhenReady).isTrue()
+    }
+
+    @Test
+    fun `a playlist url without an m3u8 extension still plays as hls`() {
+        val url = "https://example.com/playlist?token=abc"
+        val player = ExoHlsPlayerFactory().create(application, url) as ExoHlsPlayer
+        try {
+            player.attach(SurfaceView(application))
+
+            val mediaItem = player.exoPlayer!!.currentMediaItem!!
+            assertThat(mediaItem.localConfiguration?.uri.toString()).isEqualTo(url)
+            assertThat(mediaItem.localConfiguration?.mimeType).isEqualTo(MimeTypes.APPLICATION_M3U8)
+        } finally {
+            player.release()
+        }
+    }
+
+    @Test
+    fun `the stream plays as media audio`() {
+        player.attach(SurfaceView(application))
+
+        val audioAttributes = player.exoPlayer!!.audioAttributes
+        assertThat(audioAttributes.usage).isEqualTo(C.USAGE_MEDIA)
+        assertThat(audioAttributes.contentType).isEqualTo(C.AUDIO_CONTENT_TYPE_MOVIE)
     }
 
     @Test
@@ -97,6 +125,30 @@ internal class ExoHlsPlayerTest {
 
         player.setAudioEnabled(true)
         assertThat(player.exoPlayer!!.volume).isEqualTo(1f)
+    }
+
+    @Test
+    fun `audio toggled from another thread applies on the main thread`() {
+        player.attach(SurfaceView(application))
+
+        thread { player.setAudioEnabled(false) }.join()
+        assertThat(player.exoPlayer!!.volume).isEqualTo(1f)
+        shadowOf(Looper.getMainLooper()).idle()
+        assertThat(player.exoPlayer!!.volume).isEqualTo(0f)
+
+        thread { player.setAudioEnabled(true) }.join()
+        shadowOf(Looper.getMainLooper()).idle()
+        assertThat(player.exoPlayer!!.volume).isEqualTo(1f)
+    }
+
+    @Test
+    fun `audio muted from another thread before the first attach applies to the new exoplayer`() {
+        thread { player.setAudioEnabled(false) }.join()
+        shadowOf(Looper.getMainLooper()).idle()
+
+        player.attach(SurfaceView(application))
+
+        assertThat(player.exoPlayer!!.volume).isEqualTo(0f)
     }
 
     @Test

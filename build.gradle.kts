@@ -50,6 +50,7 @@ streamProject {
         includedModules = setOf(
             "stream-video-android-core",
             "stream-video-android-ui-compose",
+            "stream-video-android-hls",
         )
         sonarExclusions = listOf(
             "**/*.mp3",

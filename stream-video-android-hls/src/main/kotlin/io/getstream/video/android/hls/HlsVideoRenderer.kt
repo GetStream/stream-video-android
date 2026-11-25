@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.model.PlaybackType
 
 /**
@@ -50,6 +51,7 @@ import io.getstream.video.android.core.model.PlaybackType
  *
  * @param audioEnabled Plays the broadcast audio when true, mutes it when false.
  */
+@ExperimentalStreamVideoApi
 @Composable
 public fun HlsVideoRenderer(
     call: Call,

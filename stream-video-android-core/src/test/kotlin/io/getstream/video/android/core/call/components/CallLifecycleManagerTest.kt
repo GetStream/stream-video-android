@@ -23,6 +23,7 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.hls.HlsPlayer
 import io.getstream.video.android.core.call.hls.HlsStatsReporter
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.model.PlaybackType
 import io.mockk.coVerify
 import io.mockk.every
@@ -37,6 +38,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 
+@OptIn(ExperimentalStreamVideoApi::class)
 class CallLifecycleManagerTest {
 
     private val testDispatcher = StandardTestDispatcher()

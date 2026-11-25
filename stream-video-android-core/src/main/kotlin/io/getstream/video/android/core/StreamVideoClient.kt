@@ -94,6 +94,7 @@ import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.filter.Filters
 import io.getstream.video.android.core.filter.toMap
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.internal.module.restoreCoordinatorRequestContextFromCause
 import io.getstream.video.android.core.logging.LoggingLevel
@@ -204,6 +205,7 @@ internal class StreamVideoClient internal constructor(
     internal val enableStereoForSubscriber: Boolean = true,
     internal val telecomConfig: TelecomConfig? = null,
     internal val rejectCallWhenBusy: Boolean = false,
+    @OptIn(ExperimentalStreamVideoApi::class)
     internal val hlsPlayerFactory: HlsPlayerFactory? = null,
     internal val analytics: AnalyticsModule = AnalyticsModule.getDefault(
         coordinatorConnectionModule.api,
