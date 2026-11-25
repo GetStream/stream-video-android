@@ -19,6 +19,7 @@ package io.getstream.video.android.hls
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.view.SurfaceHolder
 import android.view.SurfaceView
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
@@ -41,6 +42,7 @@ import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlin.math.roundToInt
 
 /**
  * Plays HLS broadcasts with Media3 ExoPlayer. Pass it to [StreamVideoBuilder] to enable HLS
@@ -99,6 +101,7 @@ internal class ExoHlsPlayer(
             surface?.let(player::clearVideoSurfaceView)
             player.setVideoSurfaceView(surfaceView)
             surface = surfaceView
+            fitSurfaceToVideo()
         }
         player.play()
     }
@@ -194,7 +197,10 @@ internal class ExoHlsPlayer(
             .build()
         try {
             player.addListener(
-                ExoHlsPlayerListener(player) { _videoAspectRatio.value = it },
+                ExoHlsPlayerListener(player) {
+                    _videoAspectRatio.value = it
+                    fitSurfaceToVideo()
+                },
             )
             player.addListener(
                 object : Player.Listener {
@@ -249,6 +255,11 @@ internal class ExoHlsPlayer(
         return player
     }
 
+    private fun fitSurfaceToVideo() {
+        val player = player ?: return
+        surface?.holder?.let { fitSurfaceToVideo(it, player.videoSize) }
+    }
+
     private fun volumeFor(enabled: Boolean): Float = if (enabled) 1f else 0f
 }
 
@@ -297,6 +308,18 @@ internal class ExoHlsPlayerListener(
             player.prepare()
         }
     }
+}
+
+/**
+ * Sizes the buffer of [holder] to [videoSize]. ExoPlayer stretches each frame over the buffer, so
+ * a buffer of the video's size lets the compositor scale it into the view, which the renderer keeps
+ * at the video's aspect ratio: the frame is fitted rather than stretched or cropped. Does nothing
+ * while the size is unknown.
+ */
+internal fun fitSurfaceToVideo(holder: SurfaceHolder, videoSize: VideoSize) {
+    if (videoSize.width <= 0 || videoSize.height <= 0) return
+    val width = (videoSize.width * videoSize.pixelWidthHeightRatio).roundToInt()
+    holder.setFixedSize(width, videoSize.height)
 }
 
 /** Display aspect ratio of [videoSize], accounting for non-square pixels. Null while unknown. */
