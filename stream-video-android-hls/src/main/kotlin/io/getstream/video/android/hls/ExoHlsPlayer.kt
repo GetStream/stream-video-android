@@ -202,7 +202,16 @@ internal class ExoHlsPlayerListener(
     }
 
     override fun onPlaybackStateChanged(playbackState: Int) {
-        if (playbackState != Player.STATE_READY || !player.isCurrentMediaItemLive) return
+        jumpToLiveEdgeIfFarBehind()
+    }
+
+    // The playlist refresh that moves the live position can arrive after playback is ready again.
+    override fun onTimelineChanged(timeline: Timeline, reason: Int) {
+        jumpToLiveEdgeIfFarBehind()
+    }
+
+    private fun jumpToLiveEdgeIfFarBehind() {
+        if (player.playbackState != Player.STATE_READY || !player.isCurrentMediaItemLive) return
         val timeline = player.currentTimeline
         if (timeline.isEmpty) return
         // Measured against the default position, the live start point, rather than the live
