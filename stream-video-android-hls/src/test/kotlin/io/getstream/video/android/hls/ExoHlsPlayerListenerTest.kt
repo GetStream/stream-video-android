@@ -17,13 +17,17 @@
 package io.getstream.video.android.hls
 
 import androidx.annotation.OptIn
+import androidx.media3.common.C
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.Timeline
 import androidx.media3.common.VideoSize
 import androidx.media3.common.util.UnstableApi
 import com.google.common.truth.Truth.assertThat
 import io.mockk.confirmVerified
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import io.mockk.verifyOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -59,6 +63,56 @@ internal class ExoHlsPlayerListenerTest {
         )
 
         confirmVerified(player)
+    }
+
+    @Test
+    fun `resuming far behind the live edge jumps to it`() {
+        givenLive(liveOffsetMs = 120_000)
+
+        listener.onPlaybackStateChanged(Player.STATE_READY)
+
+        verify { player.seekToDefaultPosition() }
+    }
+
+    @Test
+    fun `resuming near the live edge stays where it is`() {
+        givenLive(liveOffsetMs = 20_000)
+
+        listener.onPlaybackStateChanged(Player.STATE_READY)
+
+        verify(exactly = 0) { player.seekToDefaultPosition() }
+    }
+
+    @Test
+    fun `only ready on a live stream is checked`() {
+        givenLive(liveOffsetMs = 120_000)
+        listener.onPlaybackStateChanged(Player.STATE_BUFFERING)
+        every { player.isCurrentMediaItemLive } returns false
+        listener.onPlaybackStateChanged(Player.STATE_READY)
+
+        verify(exactly = 0) { player.seekToDefaultPosition() }
+    }
+
+    @Test
+    fun `the jump threshold follows the target live offset`() {
+        assertThat(isFarBehindLiveEdge(liveOffsetMs = 40_000, targetOffsetMs = 30_000)).isFalse()
+        assertThat(isFarBehindLiveEdge(liveOffsetMs = 46_000, targetOffsetMs = 30_000)).isTrue()
+    }
+
+    @Test
+    fun `an unknown target uses the default and an unknown offset never jumps`() {
+        assertThat(isFarBehindLiveEdge(liveOffsetMs = 29_000, targetOffsetMs = C.TIME_UNSET))
+            .isFalse()
+        assertThat(isFarBehindLiveEdge(liveOffsetMs = 31_000, targetOffsetMs = C.TIME_UNSET))
+            .isTrue()
+        assertThat(isFarBehindLiveEdge(liveOffsetMs = C.TIME_UNSET, targetOffsetMs = 12_000))
+            .isFalse()
+    }
+
+    private fun givenLive(liveOffsetMs: Long) {
+        every { player.isCurrentMediaItemLive } returns true
+        every { player.currentLiveOffset } returns liveOffsetMs
+        every { player.currentTimeline } returns Timeline.EMPTY
     }
 
     @Test
