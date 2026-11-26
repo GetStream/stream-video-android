@@ -93,8 +93,9 @@ internal class HlsStatsClientInfo(
 
 /**
  * Reports one HLS playback session of a call to `hls_stats`: `started` when the player first
- * plays, `stats` every [HlsStatsConfig.intervalMs], and `ended` from [stop]. A session that fails
- * before its first frame cannot recover, so it sends a single `ended` with the error instead.
+ * plays, `stats` every [HlsStatsConfig.intervalMs], and `ended` from [stop] or when the stream
+ * ends. A session that fails before its first frame cannot recover, so it sends a single `ended`
+ * with the error instead.
  * Every report carries the same `user_session_id`.
  *
  * Reports are sent one at a time. Player events ride on the next report and are dropped only
@@ -146,10 +147,12 @@ internal class HlsStatsReporter(
 
     /**
      * The player moved to [state], forwarded by [HlsPlaybackObserver]. Reporting begins when
-     * playback first plays.
+     * playback first plays. [HlsPlaybackState.Ended] means the broadcast stopped and the viewer
+     * has watched all of it, so the session ends there; a restart starts a new one.
      */
     fun onPlaybackStateChanged(state: HlsPlaybackState) {
         if (collector.onState(state)) startReporting()
+        if (state == HlsPlaybackState.Ended) stop()
     }
 
     /**

@@ -20,6 +20,7 @@ import android.view.SurfaceView
 import com.google.common.truth.Truth.assertThat
 import io.getstream.android.video.generated.models.ReportHLSStatsRequest
 import io.getstream.video.android.core.call.hls.HlsPlaybackState.Buffering
+import io.getstream.video.android.core.call.hls.HlsPlaybackState.Ended
 import io.getstream.video.android.core.call.hls.HlsPlaybackState.Loading
 import io.getstream.video.android.core.call.hls.HlsPlaybackState.Playing
 import io.getstream.video.android.core.call.hls.HlsStatsDeliveryResult.Delivered
@@ -132,6 +133,33 @@ class HlsStatsReporterTest {
         val stats = delivery.requests.last().stats!!
         assertThat(stats.bitrateKbps).isEqualTo(3_000)
         assertThat(stats.width).isEqualTo(1920)
+    }
+
+    @Test
+    fun `the stream ending sends ended and stops reporting`() = runTest {
+        reporter
+        emit(Playing)
+        advanceTimeBy(INTERVAL_MS + 1)
+        emit(Ended)
+        advanceTimeBy(INTERVAL_MS * 3)
+
+        assertThat(delivery.requests.map { it.type }).containsExactly(
+            HlsStatsReporter.TYPE_STARTED,
+            HlsStatsReporter.TYPE_STATS,
+            HlsStatsReporter.TYPE_ENDED,
+        ).inOrder()
+        assertThat(delivery.requests.last().endReason).isEqualTo(HlsStatsReporter.END_REASON_LEFT)
+        assertThat(delivery.requests.last().stats?.watchDurationMs).isEqualTo(INTERVAL_MS + 1)
+    }
+
+    @Test
+    fun `the stream ending before the first frame sends nothing`() = runTest {
+        reporter
+        emit(Loading)
+        emit(Ended)
+        advanceTimeBy(INTERVAL_MS * 3)
+
+        assertThat(delivery.requests).isEmpty()
     }
 
     @Test
