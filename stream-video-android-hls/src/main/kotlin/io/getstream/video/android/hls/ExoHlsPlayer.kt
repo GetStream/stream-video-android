@@ -27,6 +27,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.Timeline
 import androidx.media3.common.VideoSize
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -184,16 +185,34 @@ internal class ExoHlsPlayer(
 }
 
 /**
- * Publishes the stream's aspect ratio and rejoins the live edge when playback falls behind the
- * live window. Other errors are left to the player's default handling.
+ * Publishes the stream's aspect ratio and keeps playback near the live edge: it rejoins the edge
+ * when playback falls behind the live window, and when playback resumes far behind it, for
+ * example after a long stall on a playlist that keeps the whole broadcast. Other errors are left
+ * to the player's default handling.
  */
 internal class ExoHlsPlayerListener(
     private val player: Player,
     private val onVideoAspectRatio: (Float) -> Unit,
 ) : Player.Listener {
 
+    private val window = Timeline.Window()
+
     override fun onVideoSizeChanged(videoSize: VideoSize) {
         videoAspectRatioOf(videoSize)?.let(onVideoAspectRatio)
+    }
+
+    override fun onPlaybackStateChanged(playbackState: Int) {
+        if (playbackState != Player.STATE_READY || !player.isCurrentMediaItemLive) return
+        if (isFarBehindLiveEdge(player.currentLiveOffset, targetLiveOffsetMs())) {
+            player.seekToDefaultPosition()
+        }
+    }
+
+    private fun targetLiveOffsetMs(): Long {
+        val timeline = player.currentTimeline
+        if (timeline.isEmpty) return C.TIME_UNSET
+        return timeline.getWindow(player.currentMediaItemIndex, window)
+            .liveConfiguration?.targetOffsetMs ?: C.TIME_UNSET
     }
 
     override fun onPlayerError(error: PlaybackException) {
@@ -204,6 +223,23 @@ internal class ExoHlsPlayerListener(
         }
     }
 }
+
+/**
+ * True when [liveOffsetMs] is so far behind [targetOffsetMs] that playback should jump to the live
+ * edge instead of catching up, which the player does by playing only slightly faster. Uses
+ * [DEFAULT_TARGET_LIVE_OFFSET_MS] as the target while it is unknown.
+ */
+internal fun isFarBehindLiveEdge(liveOffsetMs: Long, targetOffsetMs: Long): Boolean {
+    if (liveOffsetMs == C.TIME_UNSET) return false
+    val target = if (targetOffsetMs == C.TIME_UNSET) DEFAULT_TARGET_LIVE_OFFSET_MS else targetOffsetMs
+    return liveOffsetMs > target + MAX_LIVE_OFFSET_DRIFT_MS
+}
+
+/** Live offset assumed while the stream's own target is unknown. */
+internal const val DEFAULT_TARGET_LIVE_OFFSET_MS = 15_000L
+
+/** How far behind the target live offset playback may resume before it jumps to the live edge. */
+internal const val MAX_LIVE_OFFSET_DRIFT_MS = 15_000L
 
 /**
  * Sizes the buffer of [holder] to [videoSize]. ExoPlayer stretches each frame over the buffer, so
