@@ -146,20 +146,14 @@ public fun LivestreamPlayer(
     var livestreamState by rememberSaveable { mutableStateOf(LivestreamState.INITIAL) }
 
     LaunchedEffect(connection, endedAt, backstage) {
-        when (connection) {
-            is RealtimeConnection.Connected -> {
-                hasJoinedSuccessfully = true
-                livestreamState = when {
-                    endedAt != null -> LivestreamState.ENDED
-                    backstage -> LivestreamState.BACKSTAGE
-                    else -> LivestreamState.LIVE
-                }
-            }
-
-            is RealtimeConnection.Failed -> livestreamState = LivestreamState.ERROR
-            is RealtimeConnection.InProgress -> livestreamState = LivestreamState.JOINING
-            else -> { }
-        }
+        if (connection is RealtimeConnection.Connected) hasJoinedSuccessfully = true
+        livestreamState = nextLivestreamState(
+            current = livestreamState,
+            connection = connection,
+            ended = endedAt != null,
+            backstage = backstage,
+            hasJoined = hasJoinedSuccessfully,
+        )
     }
 
     LivestreamPlayerImpl(
@@ -179,6 +173,30 @@ public fun LivestreamPlayer(
         liveStreamErrorContent = liveStreamErrorContent,
         onRetryJoin = onRetryJoin,
     )
+}
+
+/**
+ * Returns the livestream state for the call's current [connection].
+ *
+ * An ended call leaves right away, so [ended] and a disconnect can arrive together. A joined
+ * viewer then still sees the ended state rather than staying on the live one.
+ */
+internal fun nextLivestreamState(
+    current: LivestreamState,
+    connection: RealtimeConnection,
+    ended: Boolean,
+    backstage: Boolean,
+    hasJoined: Boolean,
+): LivestreamState = when (connection) {
+    is RealtimeConnection.Connected -> when {
+        ended -> LivestreamState.ENDED
+        backstage -> LivestreamState.BACKSTAGE
+        else -> LivestreamState.LIVE
+    }
+
+    is RealtimeConnection.Failed -> LivestreamState.ERROR
+    is RealtimeConnection.InProgress -> LivestreamState.JOINING
+    else -> if (ended && hasJoined) LivestreamState.ENDED else current
 }
 
 @Composable
