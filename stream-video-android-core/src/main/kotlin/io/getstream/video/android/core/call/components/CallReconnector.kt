@@ -128,7 +128,8 @@ internal class CallReconnector(
             }
             return
         }
-        // HLS playback has no SFU connection to recover; the player handles its own retries.
+        // HLS playback has no SFU connection, so there is nothing to reconnect. The player retries
+        // failed playlist and segment loads itself until the network returns.
         if (sessionManager.playbackSession != null) {
             logger.d { "[reconnect] HLS playback has no SFU connection — skipping ($reason)" }
             return

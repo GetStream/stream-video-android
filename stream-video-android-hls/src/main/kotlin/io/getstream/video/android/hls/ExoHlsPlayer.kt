@@ -32,6 +32,7 @@ import androidx.media3.common.VideoSize
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.analytics.AnalyticsListener
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.call.hls.HlsPlaybackListener
 import io.getstream.video.android.core.call.hls.HlsPlaybackMetrics
@@ -179,8 +180,14 @@ internal class ExoHlsPlayer(
         playbackListener?.onPlaybackStateChanged(state)
     }
 
+    @androidx.annotation.OptIn(UnstableApi::class)
     private fun buildPlayer(): ExoPlayer {
         val player = ExoPlayer.Builder(context)
+            // Retries loads through network loss instead of failing after a few seconds offline.
+            .setMediaSourceFactory(
+                DefaultMediaSourceFactory(context)
+                    .setLoadErrorHandlingPolicy(HlsLoadErrorHandlingPolicy()),
+            )
             // An HLS viewer has no WebRTC audio, so the stream takes media audio focus: it pauses
             // for a phone call and resumes after, and pauses when headphones are unplugged.
             .setAudioAttributes(
