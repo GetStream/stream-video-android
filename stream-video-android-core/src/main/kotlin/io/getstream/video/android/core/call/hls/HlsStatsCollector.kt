@@ -98,9 +98,19 @@ internal class HlsStatsCollector(private val clock: HlsStatsClock) {
         firstPlay
     }
 
-    /** Records a playback error. The same code reported again in a row is recorded once. */
+    /**
+     * Records a playback error. The player stops on an error and reports no state until it plays
+     * again, so watch time and an open stall end here. The same code reported again in a row is
+     * recorded once.
+     */
     fun onError(code: String) = synchronized(lock) {
-        if (finished || code == lastErrorCode) return
+        if (finished) return
+        val now = clock.elapsedMs()
+        playingSinceMs?.let { watchMs += now - it }
+        playingSinceMs = null
+        endStall(now)
+        state = null
+        if (code == lastErrorCode) return
         lastErrorCode = code
         addEvent(EVENT_ERROR, mapOf("code" to code))
     }

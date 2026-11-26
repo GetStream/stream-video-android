@@ -159,6 +159,66 @@ class HlsStatsCollectorTest {
     }
 
     @Test
+    fun `an error stops watch time`() {
+        collector.onState(Playing)
+        clock.advance(2_000)
+        collector.onError("ERROR_CODE_IO_NETWORK_CONNECTION_FAILED")
+        clock.advance(10_000)
+
+        assertThat(collector.stats(null).watchDurationMs).isEqualTo(2_000)
+    }
+
+    @Test
+    fun `an error closes an open stall`() {
+        collector.onState(Playing)
+        collector.onState(Buffering)
+        clock.advance(1_500)
+        collector.onError("ERROR_CODE_IO_NETWORK_CONNECTION_FAILED")
+        clock.advance(10_000)
+
+        val stats = collector.stats(null)
+        assertThat(stats.stallCount).isEqualTo(1)
+        assertThat(stats.stallDurationMs).isEqualTo(1_500)
+        assertThat(stats.maxStallDurationMs).isEqualTo(1_500)
+        assertThat(collector.pendingEvents(10).map { it.type })
+            .containsExactly(
+                HlsStatsCollector.EVENT_STALL_START,
+                HlsStatsCollector.EVENT_STALL_END,
+                HlsStatsCollector.EVENT_ERROR,
+            )
+            .inOrder()
+    }
+
+    @Test
+    fun `counting resumes when playback recovers from an error`() {
+        collector.onState(Playing)
+        clock.advance(1_000)
+        collector.onError("ERROR_CODE_BEHIND_LIVE_WINDOW")
+        clock.advance(5_000)
+        collector.onState(Buffering)
+        clock.advance(2_000)
+        assertThat(collector.onState(Playing)).isFalse()
+        clock.advance(3_000)
+
+        val stats = collector.stats(null)
+        assertThat(stats.watchDurationMs).isEqualTo(4_000)
+        assertThat(stats.stallCount).isEqualTo(0)
+    }
+
+    @Test
+    fun `the same error code again still stops counting`() {
+        collector.onState(Playing)
+        collector.onError("ERROR_CODE_BEHIND_LIVE_WINDOW")
+        collector.onState(Playing)
+        clock.advance(1_000)
+        collector.onError("ERROR_CODE_BEHIND_LIVE_WINDOW")
+        clock.advance(10_000)
+
+        assertThat(collector.stats(null).watchDurationMs).isEqualTo(1_000)
+        assertThat(collector.pendingEvents(10)).hasSize(1)
+    }
+
+    @Test
     fun `acknowledged events are dropped and newer events stay`() {
         collector.onError("a")
         val sent = collector.pendingEvents(10)
