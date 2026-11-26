@@ -34,6 +34,8 @@ import io.getstream.video.android.compose.ui.components.video.config.videoRender
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
+import io.getstream.video.android.core.model.PlaybackType
 import io.getstream.video.android.core.sorting.bySourcePriority
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -62,9 +64,14 @@ import stream.video.sfu.models.ParticipantSource
  * @param liveStreamHostVideoNotAvailableContent UI shown when the host has no video available.
  * @param liveStreamErrorContent UI shown in case of an error joining or rendering the livestream.
  * @param onRetryJoin Callback triggered when retrying to join the livestream after a failure.
+ * @param hlsContent UI that plays the broadcast when the call joined over HLS, typically
+ * `{ call, audioEnabled -> HlsVideoRenderer(call, audioEnabled = audioEnabled) }` from the
+ * `stream-video-android-hls` module. It replaces [rendererContent] while the call is live and
+ * receives whether the viewer has audio on. When null, HLS calls render like WebRTC calls.
  *
  */
 
+@OptIn(ExperimentalStreamVideoApi::class)
 @Composable
 public fun LivestreamPlayer(
     modifier: Modifier = Modifier,
@@ -116,8 +123,12 @@ public fun LivestreamPlayer(
         LivestreamErrorUi(call, retryJoin)
     },
     onRetryJoin: () -> Unit = {},
+    hlsContent: (@Composable BoxScope.(call: Call, audioEnabled: Boolean) -> Unit)? = null,
 ) {
     val (isAudioEnabled, onAudioToggle) = rememberAudioToggleState(call)
+
+    val playbackType by call.state.playbackType.collectAsStateWithLifecycle()
+    val hlsRenderer = hlsContent?.takeIf { playbackType is PlaybackType.Hls }
 
     val wrappedRenderer = wrapRendererContent(
         call = call,
@@ -137,7 +148,8 @@ public fun LivestreamPlayer(
     )
 
     val livestream by livestreamFlow.collectAsStateWithLifecycle(initialValue = null)
-    val hostVideoAvailable = livestream?.enabled == true
+    // An HLS call has no participants, so the broadcast itself stands in for the host video.
+    val hostVideoAvailable = hlsRenderer != null || livestream?.enabled == true
 
     val connection by call.state.connection.collectAsStateWithLifecycle()
     val endedAt by call.state.endedAt.collectAsStateWithLifecycle()
@@ -172,7 +184,11 @@ public fun LivestreamPlayer(
         livestreamFlow = livestreamFlow,
         hostVideoAvailable = hostVideoAvailable,
         livestreamState = livestreamState,
-        rendererContent = wrappedRenderer,
+        rendererContent = hlsRenderer?.let { renderer ->
+            {
+                renderer(it, isAudioEnabled)
+            }
+        } ?: wrappedRenderer,
         overlayContent = wrappedOverlay,
         liveStreamEndedContent = liveStreamEndedContent,
         liveStreamHostVideoNotAvailableContent = liveStreamHostVideoNotAvailableContent,
