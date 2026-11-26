@@ -87,9 +87,23 @@ internal class ExoHlsPlayerListenerTest {
     }
 
     @Test
-    fun `only ready on a live stream is checked`() {
+    fun `a playlist refresh that moves the live position far ahead jumps to it`() {
         givenLive(positionMs = 30_000, livePositionMs = 150_000)
+
+        listener.onTimelineChanged(
+            player.currentTimeline,
+            Player.TIMELINE_CHANGE_REASON_SOURCE_UPDATE,
+        )
+
+        verify { player.seekToDefaultPosition() }
+    }
+
+    @Test
+    fun `only a ready live stream is checked`() {
+        givenLive(positionMs = 30_000, livePositionMs = 150_000)
+        every { player.playbackState } returns Player.STATE_BUFFERING
         listener.onPlaybackStateChanged(Player.STATE_BUFFERING)
+        every { player.playbackState } returns Player.STATE_READY
         every { player.isCurrentMediaItemLive } returns false
         listener.onPlaybackStateChanged(Player.STATE_READY)
 
@@ -104,6 +118,7 @@ internal class ExoHlsPlayerListenerTest {
     }
 
     private fun givenLive(positionMs: Long, livePositionMs: Long) {
+        every { player.playbackState } returns Player.STATE_READY
         every { player.isCurrentMediaItemLive } returns true
         every { player.currentPosition } returns positionMs
         every { player.currentMediaItemIndex } returns 0
