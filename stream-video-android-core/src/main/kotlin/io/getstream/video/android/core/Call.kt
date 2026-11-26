@@ -293,7 +293,13 @@ public class Call(
         CallIceConnectionMonitor(type, id, scope, sessionManager)
 
     /** Delegate that owns the event flow, subscriptions and event dispatch. */
-    private val eventManager = CallEventManager(type, id, scope, reconnector = { reconnector })
+    private val eventManager = CallEventManager(
+        type,
+        id,
+        scope,
+        reconnector = { reconnector },
+        onHlsBroadcastingStarted = { joinCoordinator.onHlsBroadcastingStarted(it) },
+    )
 
     // Must be initialized before `state` — CallState → SortedParticipantsState
     // launches a coroutine that reads `call.events` (leaking-this race).

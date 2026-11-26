@@ -85,6 +85,7 @@ class CallJoinCoordinatorTest {
 
     private companion object {
         const val HLS_URL = "https://hls.example.com/playlist.m3u8"
+        const val RESTARTED_HLS_URL = "https://hls.example.com/restarted/playlist.m3u8"
         const val HLS_ERROR = "ERROR_CODE_IO_NETWORK_CONNECTION_FAILED"
     }
 
@@ -1037,6 +1038,75 @@ class CallJoinCoordinatorTest {
         assertThat(hlsPlaybackErrorFlow.value).isNull()
         verify(exactly = 1) { reporter.onPlaybackStateChanged(any()) }
         verify(exactly = 1) { reporter.onPlaybackError(any()) }
+    }
+
+    @Test
+    fun `a restarted broadcast moves playback to the new playlist in a new stats session`() =
+        runTest(testDispatcher) {
+            stubHlsPlayback()
+            var heldReporter: HlsStatsReporter? = null
+            every { sessionManager.hlsStatsReporter } answers { heldReporter }
+            every { sessionManager.hlsStatsReporter = any() } answers { heldReporter = firstArg() }
+            val firstReporter = mockk<HlsStatsReporter>(relaxed = true)
+            val restartedReporter = mockk<HlsStatsReporter>(relaxed = true)
+            val restartedPlayer = mockk<HlsPlayer>(relaxed = true)
+            val coordinator = coordinator(
+                createHlsPlayer = { url ->
+                    if (url == RESTARTED_HLS_URL) restartedPlayer else hlsPlayer
+                },
+                createHlsStatsReporter = { player, _ ->
+                    if (player === restartedPlayer) restartedReporter else firstReporter
+                },
+            )
+            coordinator.join()
+            advanceUntilIdle()
+            val firstObserver = heldPlaybackObserver!!
+
+            coordinator.onHlsBroadcastingStarted(RESTARTED_HLS_URL)
+
+            assertThat(hlsPlayerFlow.value).isSameInstanceAs(restartedPlayer)
+            assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.Hls(RESTARTED_HLS_URL))
+            verify { firstReporter.stop() }
+            assertThat(heldReporter).isSameInstanceAs(restartedReporter)
+            assertThat(heldPlaybackObserver).isNotSameInstanceAs(firstObserver)
+            verify { restartedPlayer.setPlaybackListener(heldPlaybackObserver) }
+            verify { hlsPlayer.setPlaybackListener(null) }
+            verify { hlsPlayer.release() }
+
+            // The old player's late callbacks no longer reach the call state.
+            firstObserver.onPlaybackStateChanged(HlsPlaybackState.Ended)
+            assertThat(hlsPlaybackStateFlow.value).isNotEqualTo(HlsPlaybackState.Ended)
+        }
+
+    @Test
+    fun `a broadcast start for the current playlist keeps the player`() = runTest(testDispatcher) {
+        stubHlsPlayback()
+        var created = 0
+        val coordinator = coordinator(createHlsPlayer = {
+            created++
+            hlsPlayer
+        })
+        coordinator.join()
+        advanceUntilIdle()
+
+        coordinator.onHlsBroadcastingStarted(HLS_URL)
+
+        assertThat(created).isEqualTo(1)
+        verify(exactly = 0) { hlsPlayer.release() }
+    }
+
+    @Test
+    fun `a broadcast start without HLS playback does nothing`() = runTest(testDispatcher) {
+        var created = 0
+
+        coordinator(createHlsPlayer = {
+            created++
+            hlsPlayer
+        })
+            .onHlsBroadcastingStarted(RESTARTED_HLS_URL)
+
+        assertThat(created).isEqualTo(0)
+        assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.WebRtc)
     }
 
     @Test

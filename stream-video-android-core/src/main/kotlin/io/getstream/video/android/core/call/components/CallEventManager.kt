@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.call.components
 
+import io.getstream.android.video.generated.models.CallHLSBroadcastingStartedEvent
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.EventSubscription
@@ -37,6 +38,8 @@ internal class CallEventManager(
     // Lazy provider: the reconnector is built after the event pipeline, because `CallState` reads
     // `events` while constructing and the reconnector transitively needs the state.
     private val reconnector: () -> CallReconnector,
+    /** Moves HLS playback to the playlist of a restarted broadcast. */
+    private val onHlsBroadcastingStarted: (playlistUrl: String) -> Unit = {},
 ) {
     private val logger by taggedLogger("Call:EventManager:$type:$id")
 
@@ -76,6 +79,7 @@ internal class CallEventManager(
                 scope.launch {
                     reconnector().migrate()
                 }
+            is CallHLSBroadcastingStartedEvent -> onHlsBroadcastingStarted(event.hlsPlaylistUrl)
         }
     }
 

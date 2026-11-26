@@ -17,12 +17,14 @@
 package io.getstream.video.android.core.call.components
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.android.video.generated.models.CallHLSBroadcastingStartedEvent
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.video.android.core.base.DispatcherRule
 import io.getstream.video.android.core.events.GoAwayEvent
 import io.getstream.video.android.core.events.SFUConnectedEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -47,9 +49,15 @@ class CallEventManagerTest {
 
     private val reconnector = mockk<CallReconnector>(relaxed = true)
 
-    private fun manager() = CallEventManager("default", "call-id", testScope, reconnector = {
-        reconnector
-    })
+    private val restartedPlaylists = mutableListOf<String>()
+
+    private fun manager() = CallEventManager(
+        "default",
+        "call-id",
+        testScope,
+        reconnector = { reconnector },
+        onHlsBroadcastingStarted = { restartedPlaylists.add(it) },
+    )
 
     @Test
     fun `subscribe without filter receives every fired event`() {
@@ -128,6 +136,16 @@ class CallEventManagerTest {
         advanceUntilIdle()
 
         coVerify(exactly = 1) { reconnector.migrate() }
+    }
+
+    @Test
+    fun `handleEvent passes a started HLS broadcast's playlist on`() {
+        val event = mockk<CallHLSBroadcastingStartedEvent>(relaxed = true)
+        every { event.hlsPlaylistUrl } returns "https://hls.example.com/playlist.m3u8"
+
+        manager().handleEvent(event)
+
+        assertThat(restartedPlaylists).containsExactly("https://hls.example.com/playlist.m3u8")
     }
 
     @Test

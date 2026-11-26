@@ -49,6 +49,7 @@ import io.getstream.video.android.core.model.PlaybackType
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.ringing.RingJoinSource
 import io.getstream.video.android.core.utils.StreamRefCountedSingleFlightProcessor
+import io.getstream.video.android.core.utils.safeCall
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.NonCancellable
@@ -97,6 +98,10 @@ internal class CallJoinCoordinator(
     }
 
     private val logger by taggedLogger("Call:JoinCoordinator:$type:$id")
+
+    /** The join that granted HLS playback, kept to start a new stats session after a restart. */
+    @Volatile
+    private var playbackJoinResponse: JoinCallResponse? = null
 
     /**
      * Coalesces concurrent [join] calls into one attempt on the call [scope].
@@ -555,6 +560,7 @@ internal class CallJoinCoordinator(
             logger.i { "[joinInternal] Joined with HLS playback (reason=${playback.reason})" }
             sessionManager.playbackSession = session
             sessionManager.hlsPlayer.value = player
+            playbackJoinResponse = joinResponse
             val reporter = startHlsStatsReporter(player, joinResponse)
             sessionManager.hlsStatsReporter = reporter
             observePlayback(player, reporter)
@@ -564,6 +570,42 @@ internal class CallJoinCoordinator(
             state._connection.value = RealtimeConnection.Connected
             observePlaybackEnded()
             Success(session)
+        }
+    }
+
+    /**
+     * Moves HLS playback to [playlistUrl] when the broadcast restarts. A restart writes a new
+     * playlist, so the player of the old one would stay ended. Each playlist is its own stats
+     * session: the current one sends `ended`, and the new player starts a new one. Ignored when the
+     * call is not playing HLS or already plays this playlist.
+     */
+    fun onHlsBroadcastingStarted(playlistUrl: String) {
+        val createPlayer = hlsPlayerFactory() ?: return
+        if (playlistUrl.toHttpUrlOrNull()?.isHttps != true) return
+        lifecycle.withLeaveLock {
+            if (lifecycle.hasLeaveStarted() || sessionManager.playbackSession == null) {
+                return@withLeaveLock
+            }
+            val current = state._playbackType.value as? PlaybackType.Hls ?: return@withLeaveLock
+            if (current.playlistUrl == playlistUrl) return@withLeaveLock
+            val player = try {
+                createPlayer(playlistUrl)
+            } catch (e: Exception) {
+                logger.e(e) { "[onHlsBroadcastingStarted] Could not create the HLS player" }
+                return@withLeaveLock
+            }
+            logger.i { "[onHlsBroadcastingStarted] Broadcast restarted — switching HLS playlist" }
+            // Closed first, so the old player cannot report into the new session.
+            sessionManager.hlsPlaybackObserver?.close()
+            sessionManager.hlsStatsReporter?.stop()
+            val previous = sessionManager.hlsPlayer.value
+            previous?.let { safeCall { it.setPlaybackListener(null) } }
+            sessionManager.hlsPlayer.value = player
+            val reporter = playbackJoinResponse?.let { startHlsStatsReporter(player, it) }
+            sessionManager.hlsStatsReporter = reporter
+            observePlayback(player, reporter)
+            state._playbackType.value = PlaybackType.Hls(playlistUrl)
+            previous?.release()
         }
     }
 
