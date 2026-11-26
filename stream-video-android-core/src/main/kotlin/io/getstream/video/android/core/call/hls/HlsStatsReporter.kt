@@ -93,8 +93,9 @@ internal class HlsStatsClientInfo(
 
 /**
  * Reports one HLS playback session of a call to `hls_stats`: `started` when the player first
- * plays, `stats` every [HlsStatsConfig.intervalMs], and `ended` from [stop]. Every report carries
- * the same `user_session_id`.
+ * plays, `stats` every [HlsStatsConfig.intervalMs], and `ended` from [stop]. A session that fails
+ * before its first frame cannot recover, so it sends a single `ended` with the error instead.
+ * Every report carries the same `user_session_id`.
  *
  * Reports are sent one at a time. Player events ride on the next report and are dropped only
  * once it is handled: a failed `stats` report keeps them for the next interval, and `started` and
@@ -139,22 +140,35 @@ internal class HlsStatsReporter(
     @Volatile
     private var tokenRejected = false
 
+    /** True once the backend has handled `started`, so `ended` never arrives on its own. */
+    @Volatile
+    private var startedSent = false
+
     /**
      * The player moved to [state], forwarded by [HlsPlaybackObserver]. Reporting begins when
      * playback first plays.
      */
     fun onPlaybackStateChanged(state: HlsPlaybackState) {
-        if (collector.onState(state)) onFirstPlay()
+        if (collector.onState(state)) startReporting()
     }
 
-    /** Playback failed with [code], forwarded by [HlsPlaybackObserver]. */
+    /**
+     * Playback failed with [code], forwarded by [HlsPlaybackObserver]. Before the first frame this
+     * ends the session with a single `ended` carrying the error.
+     */
     fun onPlaybackError(code: String) {
         collector.onError(code.take(MAX_ERROR_CODE_LENGTH))
+        synchronized(lock) {
+            if (stopped || started) return
+            stopped = true
+        }
+        collector.finish()
+        scope.launch { send(TYPE_ENDED, withStats = false, retry = true) }
     }
 
     /**
      * Ends the session: stops periodic reports and ignores later player events, then sends
-     * `ended` if `started` was sent. Safe to call more than once, from any thread.
+     * `ended` if playback played. Safe to call more than once, from any thread.
      */
     fun stop() {
         val job: Job?
@@ -170,11 +184,13 @@ internal class HlsStatsReporter(
         if (!sendEnded) return
         scope.launch {
             job?.join()
+            // A stop right after the session began can cancel `started` before it went out.
+            if (!startedSent) send(TYPE_STARTED, withStats = false, retry = true)
             send(TYPE_ENDED, withStats = true, retry = true)
         }
     }
 
-    private fun onFirstPlay() {
+    private fun startReporting() {
         synchronized(lock) {
             if (stopped || started) return
             started = true
@@ -203,11 +219,13 @@ internal class HlsStatsReporter(
             when (result) {
                 HlsStatsDeliveryResult.Delivered -> {
                     collector.acknowledgeEvents(events)
+                    if (type == TYPE_STARTED) startedSent = true
                     return@withLock
                 }
                 HlsStatsDeliveryResult.Rejected -> {
                     logger.e { "[send] The backend rejected the $type report as invalid" }
                     collector.acknowledgeEvents(events)
+                    if (type == TYPE_STARTED) startedSent = true
                     return@withLock
                 }
                 HlsStatsDeliveryResult.Forbidden -> {

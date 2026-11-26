@@ -251,6 +251,33 @@ class HlsStatsReporterTest {
     }
 
     @Test
+    fun `an error before the first frame sends a single ended with the error`() = runTest {
+        reporter
+        emit(Loading)
+        reporter.onPlaybackError("ERROR_CODE_PARSING_MANIFEST_MALFORMED")
+        advanceTimeBy(INTERVAL_MS * 3)
+
+        val ended = delivery.requests.single()
+        assertThat(ended.type).isEqualTo(HlsStatsReporter.TYPE_ENDED)
+        assertThat(ended.stats).isNull()
+        assertThat(ended.endReason).isEqualTo(HlsStatsReporter.END_REASON_ERROR)
+        assertThat(ended.errorCode).isEqualTo("ERROR_CODE_PARSING_MANIFEST_MALFORMED")
+        assertThat(ended.events?.map { it.type }).containsExactly(HlsStatsCollector.EVENT_ERROR)
+    }
+
+    @Test
+    fun `stop after an error before the first frame sends nothing more`() = runTest {
+        reporter
+        reporter.onPlaybackError("ERROR_CODE_PARSING_MANIFEST_MALFORMED")
+        advanceUntilIdle()
+        reporter.stop()
+        emit(Playing)
+        advanceUntilIdle()
+
+        assertThat(delivery.requests).hasSize(1)
+    }
+
+    @Test
     fun `stop before playback plays sends nothing`() = runTest {
         reporter
         emit(Loading)
