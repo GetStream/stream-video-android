@@ -148,8 +148,11 @@ class HlsStatsReporterTest {
             HlsStatsReporter.TYPE_STATS,
             HlsStatsReporter.TYPE_ENDED,
         ).inOrder()
-        assertThat(delivery.requests.last().endReason).isEqualTo(HlsStatsReporter.END_REASON_LEFT)
-        assertThat(delivery.requests.last().stats?.watchDurationMs).isEqualTo(INTERVAL_MS + 1)
+        val ended = delivery.requests.last()
+        assertThat(ended.endReason).isEqualTo(HlsStatsReporter.END_REASON_LEFT)
+        assertThat(ended.stats?.watchDurationMs).isEqualTo(INTERVAL_MS + 1)
+        assertThat(ended.events?.map { it.type })
+            .containsExactly(HlsStatsCollector.EVENT_STREAM_ENDED)
     }
 
     @Test

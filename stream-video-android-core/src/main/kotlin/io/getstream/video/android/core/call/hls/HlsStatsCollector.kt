@@ -39,6 +39,8 @@ internal interface HlsStatsClock {
  * definition shared by every SDK: a stall starts when [HlsPlaybackState.Playing] moves to
  * [HlsPlaybackState.Buffering] and ends when playback resumes. Loading before the first frame,
  * seeking and pausing are not stalls. Watch time counts [HlsPlaybackState.Playing] only.
+ * [HlsPlaybackState.Ended] records a `stream_ended` event: the broadcast stopped and the viewer has
+ * watched all of it.
  *
  * Events stay buffered until a report carrying them is accepted, see [acknowledgeEvents].
  * Thread-safe: the player reports on the main thread while reports are built elsewhere.
@@ -49,6 +51,7 @@ internal class HlsStatsCollector(private val clock: HlsStatsClock) {
         const val EVENT_STALL_START = "stall_start"
         const val EVENT_STALL_END = "stall_end"
         const val EVENT_ERROR = "error"
+        const val EVENT_STREAM_ENDED = "stream_ended"
 
         /** Oldest events are dropped beyond this, so a long outage cannot grow the buffer forever. */
         const val MAX_BUFFERED_EVENTS = 1_000
@@ -91,8 +94,11 @@ internal class HlsStatsCollector(private val clock: HlsStatsClock) {
             HlsPlaybackState.Loading,
             HlsPlaybackState.Seeking,
             HlsPlaybackState.Paused,
-            HlsPlaybackState.Ended,
             -> endStall(now)
+            HlsPlaybackState.Ended -> {
+                endStall(now)
+                addEvent(EVENT_STREAM_ENDED)
+            }
         }
         state = newState
         firstPlay

@@ -18,6 +18,7 @@ package io.getstream.video.android.core.call.hls
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.call.hls.HlsPlaybackState.Buffering
+import io.getstream.video.android.core.call.hls.HlsPlaybackState.Ended
 import io.getstream.video.android.core.call.hls.HlsPlaybackState.Loading
 import io.getstream.video.android.core.call.hls.HlsPlaybackState.Paused
 import io.getstream.video.android.core.call.hls.HlsPlaybackState.Playing
@@ -50,6 +51,20 @@ class HlsStatsCollectorTest {
         clock.advance(1_000)
 
         assertThat(collector.stats(null).watchDurationMs).isEqualTo(4_000)
+    }
+
+    @Test
+    fun `the stream ending closes an open stall and records stream_ended`() {
+        collector.onState(Playing)
+        collector.onState(Buffering)
+        clock.advance(400)
+        collector.onState(Ended)
+
+        assertThat(collector.pendingEvents(10).map { it.type }).containsExactly(
+            HlsStatsCollector.EVENT_STALL_START,
+            HlsStatsCollector.EVENT_STALL_END,
+            HlsStatsCollector.EVENT_STREAM_ENDED,
+        ).inOrder()
     }
 
     @Test
