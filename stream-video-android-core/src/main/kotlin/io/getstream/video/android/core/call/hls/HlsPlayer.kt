@@ -19,6 +19,7 @@ package io.getstream.video.android.core.call.hls
 import android.content.Context
 import android.view.SurfaceView
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import kotlinx.coroutines.flow.StateFlow
@@ -67,9 +68,11 @@ public interface HlsPlayer {
     public fun release()
 
     /**
-     * Receives the player's state and errors for the call's HLS stats reports, or stops when
-     * [listener] is null. Called by the SDK from any thread; the listener is called on the main
-     * thread. A player that does not report keeps the default, and the call then sends no reports.
+     * Receives the player's state and errors, or stops when [listener] is null. The SDK publishes
+     * them as [CallState.hlsPlaybackState] and [CallState.hlsPlaybackError] and uses them for the
+     * call's HLS stats reports. Called by the SDK from any thread; the listener is called on the
+     * main thread. A player that does not report keeps the default, and the call then publishes
+     * no playback state and sends no reports.
      */
     public fun setPlaybackListener(listener: HlsPlaybackListener?) {}
 

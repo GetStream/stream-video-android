@@ -41,6 +41,7 @@ import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAb
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
+import io.getstream.video.android.core.call.hls.HlsPlaybackObserver
 import io.getstream.video.android.core.call.hls.HlsPlayer
 import io.getstream.video.android.core.call.hls.HlsStatsReporter
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
@@ -554,7 +555,9 @@ internal class CallJoinCoordinator(
             logger.i { "[joinInternal] Joined with HLS playback (reason=${playback.reason})" }
             sessionManager.playbackSession = session
             sessionManager.hlsPlayer.value = player
-            sessionManager.hlsStatsReporter = startHlsStatsReporter(player, joinResponse)
+            val reporter = startHlsStatsReporter(player, joinResponse)
+            sessionManager.hlsStatsReporter = reporter
+            observePlayback(player, reporter)
             state._playbackType.value = PlaybackType.Hls(playlistUrl)
             state._connection.value = RealtimeConnection.Joined(session)
             callRegistry.markActive()
@@ -569,10 +572,29 @@ internal class CallJoinCoordinator(
         player: HlsPlayer,
         joinResponse: JoinCallResponse,
     ): HlsStatsReporter? = try {
-        createHlsStatsReporter(player, joinResponse)?.also { it.start() }
+        createHlsStatsReporter(player, joinResponse)
     } catch (e: Exception) {
         logger.e(e) { "[joinPlayback] Could not start HLS stats reporting" }
         null
+    }
+
+    /**
+     * Listens to [player] for the whole playback, with or without stats: publishes its state and
+     * errors to [CallState] and forwards them to [reporter]. A player that rejects the listener
+     * still plays; the call then publishes no playback state.
+     */
+    private fun observePlayback(player: HlsPlayer, reporter: HlsStatsReporter?) {
+        val observer = HlsPlaybackObserver(
+            playbackState = state._hlsPlaybackState,
+            playbackError = state._hlsPlaybackError,
+            statsReporter = reporter,
+        )
+        sessionManager.hlsPlaybackObserver = observer
+        try {
+            player.setPlaybackListener(observer)
+        } catch (e: Exception) {
+            logger.e(e) { "[joinPlayback] Could not listen to the HLS player" }
+        }
     }
 
     /**

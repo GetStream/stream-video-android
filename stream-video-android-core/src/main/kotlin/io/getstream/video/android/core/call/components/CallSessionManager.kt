@@ -21,6 +21,7 @@ package io.getstream.video.android.core.call.components
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.EmptyRtcSession
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.hls.HlsPlaybackObserver
 import io.getstream.video.android.core.call.hls.HlsPlayer
 import io.getstream.video.android.core.call.hls.HlsStatsReporter
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
@@ -78,6 +79,10 @@ internal class CallSessionManager() {
     /** Reports [hlsPlayer] playback to `hls_stats`, unless HLS stats are turned off. */
     @Volatile
     var hlsStatsReporter: HlsStatsReporter? = null
+
+    /** The SDK's listener on [hlsPlayer]. Set and cleared together with [playbackSession]. */
+    @Volatile
+    var hlsPlaybackObserver: HlsPlaybackObserver? = null
 
     /**
      * Leaves the call when it ends during HLS playback, see [CallJoinCoordinator]. Started and

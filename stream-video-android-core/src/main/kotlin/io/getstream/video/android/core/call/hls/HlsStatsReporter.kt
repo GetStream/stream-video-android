@@ -139,24 +139,22 @@ internal class HlsStatsReporter(
     @Volatile
     private var tokenRejected = false
 
-    private val listener = object : HlsPlaybackListener {
-        override fun onPlaybackStateChanged(state: HlsPlaybackState) {
-            if (collector.onState(state)) onFirstPlay()
-        }
-
-        override fun onPlaybackError(code: String) {
-            collector.onError(code.take(MAX_ERROR_CODE_LENGTH))
-        }
+    /**
+     * The player moved to [state], forwarded by [HlsPlaybackObserver]. Reporting begins when
+     * playback first plays.
+     */
+    fun onPlaybackStateChanged(state: HlsPlaybackState) {
+        if (collector.onState(state)) onFirstPlay()
     }
 
-    /** Starts listening to the player. Reporting begins when playback first plays. */
-    fun start() {
-        player.setPlaybackListener(listener)
+    /** Playback failed with [code], forwarded by [HlsPlaybackObserver]. */
+    fun onPlaybackError(code: String) {
+        collector.onError(code.take(MAX_ERROR_CODE_LENGTH))
     }
 
     /**
-     * Ends the session: stops listening and periodic reports, then sends `ended` if `started`
-     * was sent. Safe to call more than once, from any thread.
+     * Ends the session: stops periodic reports and ignores later player events, then sends
+     * `ended` if `started` was sent. Safe to call more than once, from any thread.
      */
     fun stop() {
         val job: Job?
@@ -167,7 +165,6 @@ internal class HlsStatsReporter(
             job = reportingJob
             sendEnded = started
         }
-        player.setPlaybackListener(null)
         collector.finish()
         job?.cancel()
         if (!sendEnded) return

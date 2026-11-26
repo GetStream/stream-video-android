@@ -85,6 +85,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.hls.HlsPlaybackState
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionManager
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
@@ -297,6 +298,35 @@ public class CallState(
      */
     @ExperimentalStreamVideoApi
     public val playbackType: StateFlow<PlaybackType> = _playbackType
+
+    internal val _hlsPlaybackState = MutableStateFlow<HlsPlaybackState?>(null)
+
+    /**
+     * State of the HLS player while [playbackType] is [PlaybackType.Hls], or null otherwise and
+     * until the player reports its first state, which happens once a renderer is shown.
+     *
+     * The SDK does not rejoin by itself. When this is [HlsPlaybackState.Ended], or
+     * [hlsPlaybackError] is set, while the call has not ended, show your own UI or call
+     * [Call.leave] and then [Call.join] again: the new join returns the current playlist, or
+     * joins over WebRTC.
+     *
+     * Beta: HLS delivery is enabled per call type by Stream and may change.
+     */
+    @ExperimentalStreamVideoApi
+    public val hlsPlaybackState: StateFlow<HlsPlaybackState?> = _hlsPlaybackState
+
+    internal val _hlsPlaybackError = MutableStateFlow<String?>(null)
+
+    /**
+     * Code of the last error that stopped HLS playback, for example
+     * `ERROR_CODE_IO_NETWORK_CONNECTION_FAILED`, or null. Cleared when playback reaches
+     * [HlsPlaybackState.Playing] again, and null while [playbackType] is not [PlaybackType.Hls].
+     * See [hlsPlaybackState] for how to recover.
+     *
+     * Beta: HLS delivery is enabled per call type by Stream and may change.
+     */
+    @ExperimentalStreamVideoApi
+    public val hlsPlaybackError: StateFlow<String?> = _hlsPlaybackError
 
     private val internalParticipants = ConcurrentHashMap<SessionId, ParticipantState>()
     private val _participants = MutableStateFlow<Map<String, ParticipantState>>(emptyMap())
@@ -2144,6 +2174,8 @@ public class CallState(
 
     internal fun cleanup() {
         previousRingingStates.clear()
+        _hlsPlaybackState.value = null
+        _hlsPlaybackError.value = null
         activeStateGate.cleanup()
         cancelTimeout()
     }

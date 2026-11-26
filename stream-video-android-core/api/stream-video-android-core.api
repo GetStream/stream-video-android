@@ -12544,6 +12544,8 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getEndedAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getEndedByUser ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getErrors ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getHlsPlaybackError ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getHlsPlaybackState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getIndividualRecording ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getIngress ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getLive ()Lkotlinx/coroutines/flow/StateFlow;

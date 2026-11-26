@@ -67,10 +67,7 @@ class HlsStatsReporterTest {
             },
             clientInfo = HlsStatsClientInfo("stream-android", "1.0.0", "Android", "15"),
             retryDelaysMs = listOf(1_000L, 2_000L),
-        ).also {
-            reporterOrNull = it
-            it.start()
-        }
+        ).also { reporterOrNull = it }
 
     private var reporterOrNull: HlsStatsReporter? = null
     private val reporterJob = Job()
@@ -87,7 +84,7 @@ class HlsStatsReporterTest {
     @Test
     fun `sends nothing until playback first plays`() = runTest {
         reporter
-        player.emit(Loading)
+        emit(Loading)
         advanceTimeBy(INTERVAL_MS * 3)
 
         assertThat(delivery.requests).isEmpty()
@@ -96,7 +93,7 @@ class HlsStatsReporterTest {
     @Test
     fun `sends started without stats on first play`() = runTest {
         reporter
-        player.emit(Playing)
+        emit(Playing)
         runCurrent()
 
         val started = delivery.requests.single()
@@ -113,7 +110,7 @@ class HlsStatsReporterTest {
     @Test
     fun `sends stats every interval with the same user session id`() = runTest {
         reporter
-        player.emit(Playing)
+        emit(Playing)
         advanceTimeBy(INTERVAL_MS * 2 + 1)
 
         assertThat(delivery.requests.map { it.type }).containsExactly(
@@ -129,7 +126,7 @@ class HlsStatsReporterTest {
     fun `stats carry the player readings`() = runTest {
         player.metrics = HlsPlaybackMetrics(bitrateKbps = 3_000, width = 1920, height = 1080)
         reporter
-        player.emit(Playing)
+        emit(Playing)
         advanceTimeBy(INTERVAL_MS + 1)
 
         val stats = delivery.requests.last().stats!!
@@ -140,7 +137,7 @@ class HlsStatsReporterTest {
     @Test
     fun `delivered events are not sent again`() = runTest {
         reporter
-        player.emit(Playing)
+        emit(Playing)
         runCurrent()
         stall()
         advanceTimeBy(INTERVAL_MS * 2)
@@ -156,7 +153,7 @@ class HlsStatsReporterTest {
     @Test
     fun `a failed stats report keeps its events for the next one`() = runTest {
         reporter
-        player.emit(Playing)
+        emit(Playing)
         runCurrent()
         stall()
         delivery.results.add(Failed)
@@ -173,7 +170,7 @@ class HlsStatsReporterTest {
     @Test
     fun `a rejected report drops its events`() = runTest {
         reporter
-        player.emit(Playing)
+        emit(Playing)
         runCurrent()
         stall()
         delivery.results.add(Rejected)
@@ -188,7 +185,7 @@ class HlsStatsReporterTest {
     fun `a rejected stats token stops reporting, including ended`() = runTest {
         reporter
         delivery.results.add(Forbidden)
-        player.emit(Playing)
+        emit(Playing)
         advanceTimeBy(INTERVAL_MS * 3)
         reporter.stop()
         advanceUntilIdle()
@@ -200,7 +197,7 @@ class HlsStatsReporterTest {
     fun `started is retried until delivered`() = runTest {
         reporter
         delivery.results.addAll(listOf(Failed, Failed))
-        player.emit(Playing)
+        emit(Playing)
         advanceTimeBy(3_001)
 
         assertThat(delivery.requests.map { it.type }).containsExactly(
@@ -213,7 +210,7 @@ class HlsStatsReporterTest {
     @Test
     fun `stop sends ended with reason left`() = runTest {
         reporter
-        player.emit(Playing)
+        emit(Playing)
         advanceTimeBy(1_000)
         reporter.stop()
         advanceUntilIdle()
@@ -229,9 +226,9 @@ class HlsStatsReporterTest {
     @Test
     fun `ended after a playback error carries the error code`() = runTest {
         reporter
-        player.emit(Playing)
+        emit(Playing)
         runCurrent()
-        player.listener?.onPlaybackError("ERROR_CODE_BEHIND_LIVE_WINDOW")
+        reporter.onPlaybackError("ERROR_CODE_BEHIND_LIVE_WINDOW")
         reporter.stop()
         advanceUntilIdle()
 
@@ -244,7 +241,7 @@ class HlsStatsReporterTest {
     @Test
     fun `ended is retried until delivered`() = runTest {
         reporter
-        player.emit(Playing)
+        emit(Playing)
         runCurrent()
         delivery.results.addAll(listOf(Failed, Failed))
         reporter.stop()
@@ -256,31 +253,49 @@ class HlsStatsReporterTest {
     @Test
     fun `stop before playback plays sends nothing`() = runTest {
         reporter
-        player.emit(Loading)
+        emit(Loading)
         reporter.stop()
-        player.emit(Playing)
+        emit(Playing)
         advanceUntilIdle()
 
         assertThat(delivery.requests).isEmpty()
     }
 
     @Test
-    fun `stop clears the player listener and a second stop sends nothing more`() = runTest {
+    fun `a second stop sends nothing more`() = runTest {
         reporter
-        player.emit(Playing)
+        emit(Playing)
         runCurrent()
         reporter.stop()
         reporter.stop()
         advanceUntilIdle()
 
-        assertThat(player.listener).isNull()
         assertThat(delivery.requests.count { it.type == HlsStatsReporter.TYPE_ENDED }).isEqualTo(1)
     }
 
+    @Test
+    fun `player events after stop are ignored`() = runTest {
+        reporter
+        emit(Playing)
+        runCurrent()
+        reporter.stop()
+        emit(Buffering)
+        reporter.onPlaybackError("ERROR_CODE_IO_NETWORK_CONNECTION_FAILED")
+        advanceUntilIdle()
+
+        val ended = delivery.requests.last()
+        assertThat(ended.endReason).isEqualTo(HlsStatsReporter.END_REASON_LEFT)
+        assertThat(ended.events).isNull()
+    }
+
+    private fun TestScope.emit(state: HlsPlaybackState) {
+        reporter.onPlaybackStateChanged(state)
+    }
+
     private fun TestScope.stall() {
-        player.emit(Buffering)
+        emit(Buffering)
         advanceTimeBy(500)
-        player.emit(Playing)
+        emit(Playing)
     }
 
     private class FakeDelivery : HlsStatsDelivery {
@@ -294,7 +309,6 @@ class HlsStatsReporterTest {
     }
 
     private class FakeReportingPlayer : HlsPlayer {
-        var listener: HlsPlaybackListener? = null
         var metrics: HlsPlaybackMetrics? = HlsPlaybackMetrics()
 
         override val playlistUrl: String = "https://example.com/playlist.m3u8"
@@ -303,13 +317,6 @@ class HlsStatsReporterTest {
         override fun detach(surfaceView: SurfaceView) = Unit
         override fun setAudioEnabled(enabled: Boolean) = Unit
         override fun release() = Unit
-        override fun setPlaybackListener(listener: HlsPlaybackListener?) {
-            this.listener = listener
-        }
         override fun readPlaybackMetrics(): HlsPlaybackMetrics? = metrics
-
-        fun emit(state: HlsPlaybackState) {
-            listener?.onPlaybackStateChanged(state)
-        }
     }
 }
