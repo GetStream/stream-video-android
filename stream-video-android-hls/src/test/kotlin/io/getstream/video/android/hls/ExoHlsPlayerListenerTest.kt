@@ -18,11 +18,14 @@ package io.getstream.video.android.hls
 
 import androidx.annotation.OptIn
 import androidx.media3.common.C
+import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.common.VideoSize
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.source.ForwardingTimeline
+import androidx.media3.exoplayer.source.SinglePeriodTimeline
 import com.google.common.truth.Truth.assertThat
 import io.mockk.confirmVerified
 import io.mockk.every
@@ -67,7 +70,7 @@ internal class ExoHlsPlayerListenerTest {
 
     @Test
     fun `resuming far behind the live edge jumps to it`() {
-        givenLive(liveOffsetMs = 120_000)
+        givenLive(positionMs = 30_000, livePositionMs = 150_000)
 
         listener.onPlaybackStateChanged(Player.STATE_READY)
 
@@ -76,7 +79,7 @@ internal class ExoHlsPlayerListenerTest {
 
     @Test
     fun `resuming near the live edge stays where it is`() {
-        givenLive(liveOffsetMs = 20_000)
+        givenLive(positionMs = 140_000, livePositionMs = 150_000)
 
         listener.onPlaybackStateChanged(Player.STATE_READY)
 
@@ -85,7 +88,7 @@ internal class ExoHlsPlayerListenerTest {
 
     @Test
     fun `only ready on a live stream is checked`() {
-        givenLive(liveOffsetMs = 120_000)
+        givenLive(positionMs = 30_000, livePositionMs = 150_000)
         listener.onPlaybackStateChanged(Player.STATE_BUFFERING)
         every { player.isCurrentMediaItemLive } returns false
         listener.onPlaybackStateChanged(Player.STATE_READY)
@@ -94,25 +97,41 @@ internal class ExoHlsPlayerListenerTest {
     }
 
     @Test
-    fun `the jump threshold follows the target live offset`() {
-        assertThat(isFarBehindLiveEdge(liveOffsetMs = 40_000, targetOffsetMs = 30_000)).isFalse()
-        assertThat(isFarBehindLiveEdge(liveOffsetMs = 46_000, targetOffsetMs = 30_000)).isTrue()
+    fun `the jump threshold is the allowed drift behind the live position`() {
+        assertThat(isFarBehindLiveEdge(positionMs = 35_000, livePositionMs = 50_000)).isFalse()
+        assertThat(isFarBehindLiveEdge(positionMs = 34_000, livePositionMs = 50_000)).isTrue()
+        assertThat(isFarBehindLiveEdge(positionMs = 0, livePositionMs = C.TIME_UNSET)).isFalse()
     }
 
-    @Test
-    fun `an unknown target uses the default and an unknown offset never jumps`() {
-        assertThat(isFarBehindLiveEdge(liveOffsetMs = 29_000, targetOffsetMs = C.TIME_UNSET))
-            .isFalse()
-        assertThat(isFarBehindLiveEdge(liveOffsetMs = 31_000, targetOffsetMs = C.TIME_UNSET))
-            .isTrue()
-        assertThat(isFarBehindLiveEdge(liveOffsetMs = C.TIME_UNSET, targetOffsetMs = 12_000))
-            .isFalse()
-    }
-
-    private fun givenLive(liveOffsetMs: Long) {
+    private fun givenLive(positionMs: Long, livePositionMs: Long) {
         every { player.isCurrentMediaItemLive } returns true
-        every { player.currentLiveOffset } returns liveOffsetMs
-        every { player.currentTimeline } returns Timeline.EMPTY
+        every { player.currentPosition } returns positionMs
+        every { player.currentMediaItemIndex } returns 0
+        every { player.currentTimeline } returns liveTimeline(livePositionMs)
+    }
+
+    @OptIn(UnstableApi::class)
+    private fun liveTimeline(defaultPositionMs: Long): Timeline = SinglePeriodTimeline(
+        /* durationUs = */
+        200_000_000L,
+        /* isSeekable = */
+        true,
+        /* isDynamic = */
+        true,
+        /* useLiveConfiguration = */
+        false,
+        /* manifest = */
+        null,
+        MediaItem.fromUri("https://example.com/playlist.m3u8"),
+    ).let { base ->
+        object : ForwardingTimeline(base) {
+            override fun getWindow(
+                windowIndex: Int,
+                window: Timeline.Window,
+                defaultPositionProjectionUs: Long,
+            ): Timeline.Window = super.getWindow(windowIndex, window, defaultPositionProjectionUs)
+                .also { it.defaultPositionUs = defaultPositionMs * 1_000 }
+        }
     }
 
     @Test

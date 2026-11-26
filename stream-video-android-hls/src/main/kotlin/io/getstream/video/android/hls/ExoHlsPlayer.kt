@@ -203,16 +203,17 @@ internal class ExoHlsPlayerListener(
 
     override fun onPlaybackStateChanged(playbackState: Int) {
         if (playbackState != Player.STATE_READY || !player.isCurrentMediaItemLive) return
-        if (isFarBehindLiveEdge(player.currentLiveOffset, targetLiveOffsetMs())) {
+        val timeline = player.currentTimeline
+        if (timeline.isEmpty) return
+        // Measured against the default position, the live start point, rather than the live
+        // offset, which needs program date times that the playlist may not carry.
+        val livePositionMs = timeline.getWindow(
+            player.currentMediaItemIndex,
+            window,
+        ).defaultPositionMs
+        if (isFarBehindLiveEdge(player.currentPosition, livePositionMs)) {
             player.seekToDefaultPosition()
         }
-    }
-
-    private fun targetLiveOffsetMs(): Long {
-        val timeline = player.currentTimeline
-        if (timeline.isEmpty) return C.TIME_UNSET
-        return timeline.getWindow(player.currentMediaItemIndex, window)
-            .liveConfiguration?.targetOffsetMs ?: C.TIME_UNSET
     }
 
     override fun onPlayerError(error: PlaybackException) {
@@ -225,21 +226,17 @@ internal class ExoHlsPlayerListener(
 }
 
 /**
- * True when [liveOffsetMs] is so far behind [targetOffsetMs] that playback should jump to the live
- * edge instead of catching up, which the player does by playing only slightly faster. Uses
- * [DEFAULT_TARGET_LIVE_OFFSET_MS] as the target while it is unknown.
+ * True when [positionMs] is so far behind [livePositionMs], the window's default position, that
+ * playback should jump to the live edge instead of catching up, which the player does by playing
+ * only slightly faster.
  */
-internal fun isFarBehindLiveEdge(liveOffsetMs: Long, targetOffsetMs: Long): Boolean {
-    if (liveOffsetMs == C.TIME_UNSET) return false
-    val target = if (targetOffsetMs == C.TIME_UNSET) DEFAULT_TARGET_LIVE_OFFSET_MS else targetOffsetMs
-    return liveOffsetMs > target + MAX_LIVE_OFFSET_DRIFT_MS
+internal fun isFarBehindLiveEdge(positionMs: Long, livePositionMs: Long): Boolean {
+    if (livePositionMs == C.TIME_UNSET) return false
+    return livePositionMs - positionMs > MAX_LIVE_POSITION_DRIFT_MS
 }
 
-/** Live offset assumed while the stream's own target is unknown. */
-internal const val DEFAULT_TARGET_LIVE_OFFSET_MS = 15_000L
-
-/** How far behind the target live offset playback may resume before it jumps to the live edge. */
-internal const val MAX_LIVE_OFFSET_DRIFT_MS = 15_000L
+/** How far behind the live start point playback may resume before it jumps to the live edge. */
+internal const val MAX_LIVE_POSITION_DRIFT_MS = 15_000L
 
 /**
  * Sizes the buffer of [holder] to [videoSize]. ExoPlayer stretches each frame over the buffer, so
