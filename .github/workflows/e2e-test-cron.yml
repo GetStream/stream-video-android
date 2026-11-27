@@ -26,7 +26,10 @@ jobs:
       actions: write
       contents: read
     name: Test compose
-    runs-on: { group: github-public-amd64 }
+    # A standard GitHub-hosted runner: the emulator needs its 4 cores, and the 2-core runners in
+    # the static-IP group are too slow for the multi-participant tests. Nothing in this job calls
+    # the GitHub API, which the org IP allow list only admits from static-IP runners.
+    runs-on: ubuntu-24.04
     needs: build-compose-apks
     strategy:
       matrix:
