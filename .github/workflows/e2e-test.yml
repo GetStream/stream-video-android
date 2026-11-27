@@ -32,13 +32,32 @@ env:
   GITHUB_PR_NUM: ${{ github.event.pull_request.number }}
 
 jobs:
+  # Static IP: on pull requests it asks the GitHub API which files changed, and the org IP allow
+  # list only admits static-IP runners.
+  e2e-scope:
+    permissions:
+      contents: read
+      pull-requests: read
+    name: Scope
+    runs-on: { group: github-public-amd64 }
+    outputs:
+      required: ${{ steps.scope.outputs.required }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: GetStream/android-ci-actions/actions/setup-ruby@cb46e4f44d105a68738bfd2a1cfd156bb768665b
+      - name: Decide whether the E2E tests run
+        id: scope
+        run: bundle exec fastlane e2e_scope
   build-compose-apks:
     permissions:
       actions: write
       contents: read
       pull-requests: read
     name: Build
+    needs: e2e-scope
     uses: ./.github/workflows/e2e-build.yml
+    with:
+      e2e_required: ${{ needs.e2e-scope.outputs.required }}
     secrets: inherit
   allure_testops_launch:
     permissions:
@@ -70,7 +89,7 @@ jobs:
     needs:
       - build-compose-apks
       - allure_testops_launch
-    # The build job already asked the GitHub API whether this pull request touches the E2E sources.
+    # e2e-scope already asked the GitHub API whether this pull request touches the E2E sources.
     if: ${{ needs.build-compose-apks.outputs.built == 'true' }}
     strategy:
       matrix:
@@ -140,6 +159,7 @@ jobs:
     runs-on: { group: github-public-amd64 }
     if: ${{ always() }}
     needs:
+      - e2e-scope
       - build-compose-apks
       - allure_testops_launch
       - run-compose-tests
