@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalStreamVideoApi::class)
+
 package io.getstream.video.android.core.call.components
 
 import io.getstream.android.video.generated.models.JoinCallResponse
+import io.getstream.android.video.generated.models.PlaybackResponse
 import io.getstream.android.video.generated.models.RingCallRequest
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
@@ -38,6 +41,9 @@ import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAb
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
+import io.getstream.video.android.core.call.hls.HlsPlayer
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
+import io.getstream.video.android.core.model.PlaybackType
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.ringing.RingJoinSource
 import io.getstream.video.android.core.utils.StreamRefCountedSingleFlightProcessor
@@ -46,8 +52,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import stream.video.sfu.models.WebsocketReconnectStrategy
 
 /**
@@ -70,8 +78,13 @@ internal class CallJoinCoordinator(
     private val sessionMonitor: SessionMonitor,
     private val callRegistry: ClientCallRegistry,
     private val hasRequiredPermissions: () -> Boolean,
+    // Builds the EmptyRtcSession returned when the backend serves HLS playback.
+    private val createPlaybackSession: () -> RtcSession,
     // Reads and clears the source of a ring-driven join; see Call.consumeJoinSource.
     private val consumeJoinSource: () -> RingJoinSource? = { null },
+    // Returns the builder of the call's HLS player from a playlist URL, read at join time. Null
+    // when the app registered no HlsPlayerFactory: the join then never asks for HLS.
+    private val hlsPlayerFactory: () -> ((playlistUrl: String) -> HlsPlayer)? = { null },
 ) {
     private companion object {
         const val JOIN_FLIGHT_KEY = "join"
@@ -222,11 +235,15 @@ internal class CallJoinCoordinator(
     ): Result<RtcSession> {
         // Subsequent join() calls while a session is live return that session instead of
         // building a second one. [joinInternal] repeats the same check for direct callers.
-        sessionManager.session.value?.let { existing ->
+        joinedSession()?.let { existing ->
             logger.w { "[join] Call already joined — returning existing session" }
             existing.sfuTracer.trace("join-already-joined", "join() while session already live")
             return Success(existing)
         }
+
+        // Before any suspend: a leave that lands while this join waits (guest token, audio
+        // factory, coordinator request) must stay visible to the checks below, not be reset.
+        lifecycle.resetLeaveGuard()
 
         // Live-select before any suspend so coalesced waiters and SFU observers see the
         // first non-cancelled waiter's interceptor, not a stale leader after Activity death.
@@ -266,7 +283,6 @@ internal class CallJoinCoordinator(
 
         var result: Result<RtcSession>
 
-        lifecycle.resetLeaveGuard()
         while (retryCount < 3) {
             result = joinInternal(
                 create,
@@ -277,6 +293,10 @@ internal class CallJoinCoordinator(
                 JoinAnalyticsModel(retryCount, JoinReason.FirstAttempt, joinSource),
             )
             if (result is Success) {
+                // An HLS viewer publishes nothing, so local capture stays as it is.
+                if (state._playbackType.value is PlaybackType.Hls) {
+                    return result
+                }
                 // we initialise the camera, mic and other according to local + backend settings
                 // only when the call is joined to make sure we don't switch and override
                 // the settings during a call.
@@ -292,6 +312,12 @@ internal class CallJoinCoordinator(
                 return result
             }
             if (result is Failure) {
+                // Leave wins over the join that was in flight. Setting Failed here would
+                // overwrite the Disconnected state leave just published.
+                if (lifecycle.hasLeaveStarted()) {
+                    logger.i { "[join] Leave started during join — discarding the result" }
+                    return result
+                }
                 sessionManager.setActiveSession(null)
                 logger.e { "Join failed with error $result" }
                 if (isPermanentError(result.value)) {
@@ -382,7 +408,7 @@ internal class CallJoinCoordinator(
         // Gate before any teardown: cancelSfuObservers() would leave the live session without
         // its SFU event subscription, and only monitorSession() (further down, on the new-session
         // path) restores it.
-        sessionManager.session.value?.let { existing ->
+        joinedSession()?.let { existing ->
             logger.i { "[joinInternal] Call already joined — returning existing session" }
             existing.sfuTracer.trace(
                 "join-already-joined",
@@ -425,10 +451,18 @@ internal class CallJoinCoordinator(
                 // The coordinator rejects a join whose flag disagrees with the call. This is
                 // the first join; rejoin / migrate omit it and CallApiClient reads the manager.
                 e2ee = state.e2eeEnabled.value,
+                playbackCapabilities = hlsPlayerFactory()?.let {
+                    listOf(
+                        PlaybackResponse.Type.Hls.value,
+                    )
+                },
             )
 
         if (result !is Success) {
             return result as Failure
+        }
+        result.value.playback?.let { playback ->
+            return joinPlayback(playback)
         }
         val sfuToken = result.value.credentials.token
         val sfuUrl = result.value.credentials.server.url
@@ -465,6 +499,81 @@ internal class CallJoinCoordinator(
                 }
             }
             throw ce
+        }
+    }
+
+    private fun joinedSession(): RtcSession? =
+        sessionManager.session.value ?: sessionManager.playbackSession
+
+    /**
+     * Completes a join the backend served as HLS playback. No SFU connection is made, so the
+     * session monitor (SFU events, network-driven reconnects) and the stats reporter never start.
+     * The returned session is held as [CallSessionManager.playbackSession], never as the active
+     * session, and the call's [HlsPlayer] as [CallSessionManager.hlsPlayer].
+     */
+    private fun joinPlayback(playback: PlaybackResponse): Result<RtcSession> {
+        val playlistUrl = playback.playlistUrl
+        // Only an absolute https URL is played; a blank or malformed one fails the join.
+        val isHttpsUrl = playlistUrl.toHttpUrlOrNull()?.isHttps == true
+        val createPlayer = hlsPlayerFactory()
+        if (playback.type != PlaybackResponse.Type.Hls || !isHttpsUrl || createPlayer == null) {
+            logger.e {
+                "[joinInternal] Unsupported playback (type=${playback.type}, " +
+                    "hasHttpsUrl=$isHttpsUrl, hasPlayer=${createPlayer != null})"
+            }
+            return Failure(Error.GenericError("Unsupported playback type: ${playback.type}"))
+        }
+        // The grant is installed below without suspending, so a leave that started while
+        // joinRequest was in flight cannot cancel it. The lock keeps that leave from landing
+        // between the check and the writes.
+        return lifecycle.withLeaveLock {
+            if (lifecycle.hasLeaveStarted()) {
+                logger.w { "[joinPlayback] Leave already started — discarding HLS grant" }
+                return@withLeaveLock Failure(
+                    Error.GenericError("Call left before HLS playback started"),
+                )
+            }
+            val session = createPlaybackSession()
+            val player = try {
+                createPlayer(playlistUrl)
+            } catch (e: Exception) {
+                logger.e(e) { "[joinPlayback] Could not create the HLS player" }
+                session.cleanup()
+                return@withLeaveLock Failure(
+                    Error.ThrowableError("Could not create the HLS player", e),
+                )
+            }
+            logger.i { "[joinInternal] Joined with HLS playback (reason=${playback.reason})" }
+            sessionManager.playbackSession = session
+            sessionManager.hlsPlayer.value = player
+            state._playbackType.value = PlaybackType.Hls(playlistUrl)
+            state._connection.value = RealtimeConnection.Joined(session)
+            callRegistry.markActive()
+            state._connection.value = RealtimeConnection.Connected
+            observePlaybackEnded()
+            Success(session)
+        }
+    }
+
+    /**
+     * Leaves the call once its session ends while joined over HLS. With no SFU there is no SFU
+     * call-ended event, so a missed coordinator `call.ended` event would keep the viewer
+     * connected. Reads the session's end time rather than [CallState.endedAt], which is also
+     * set when the host goes back to backstage: like WebRTC viewers, HLS viewers stay then. An
+     * end time already set at join does not count. Cancelled when playback is cleared, and leave
+     * runs only once, so this never leaves a second time after `call.ended`.
+     */
+    private fun observePlaybackEnded() {
+        val endedAtOnJoin = state.session.value?.endedAt
+        sessionManager.playbackEndedJob = scope.launch {
+            state.session.map { it?.endedAt }.first { it != null && it != endedAtOnJoin }
+            logger.i { "[joinPlayback] Call ended during HLS playback — leaving" }
+            lifecycle.leave(
+                CallLeaveReason.Backend(
+                    cause = BackendCause.CALL_ENDED_EVENT,
+                    message = "call-ended-during-hls-playback",
+                ),
+            )
         }
     }
 

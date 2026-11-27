@@ -128,6 +128,11 @@ internal class CallReconnector(
             }
             return
         }
+        // HLS playback has no SFU connection to recover; the player handles its own retries.
+        if (sessionManager.playbackSession != null) {
+            logger.d { "[reconnect] HLS playback has no SFU connection — skipping ($reason)" }
+            return
+        }
 
         // Use tryLock so concurrent triggers (stateJob, NetworkStateListener,
         // SfuSocket errors) don't queue up. If a reconnect loop is already

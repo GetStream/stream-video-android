@@ -54,6 +54,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.analytics.call.CallAnalytics
 import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
+import io.getstream.video.android.core.call.EmptyRtcSession
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.components.CallApiClient
@@ -73,6 +74,7 @@ import io.getstream.video.android.core.call.components.NoiseCancellationPolicy
 import io.getstream.video.android.core.call.components.RtcSessionFactory
 import io.getstream.video.android.core.call.components.SessionMonitor
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
+import io.getstream.video.android.core.call.hls.HlsPlayer
 import io.getstream.video.android.core.call.scope.ScopeProvider
 import io.getstream.video.android.core.call.scope.ScopeProviderImpl
 import io.getstream.video.android.core.call.video.VideoFilter
@@ -80,6 +82,7 @@ import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
 import io.getstream.video.android.core.e2ee.E2EEManager
 import io.getstream.video.android.core.e2ee.StreamEncryptionManager
 import io.getstream.video.android.core.events.VideoEventListener
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.core.model.QueriedMembers
@@ -169,6 +172,15 @@ public class Call(
     //  is also internal, so it cannot appear in a public signature at all.
     internal val session: StateFlow<RtcSession?> get() = sessionManager.session
 
+    /**
+     * Plays the call's HLS broadcast. Set while [CallState.playbackType] is
+     * [io.getstream.video.android.core.model.PlaybackType.Hls], null otherwise. Read by the HLS
+     * renderer in `stream-video-android-hls`.
+     */
+    @InternalStreamVideoApi
+    @ExperimentalStreamVideoApi
+    public val hlsPlayer: StateFlow<HlsPlayer?> get() = sessionManager.hlsPlayer
+
     var sessionId: String
         get() = sessionManager.sessionId
         set(value) {
@@ -204,6 +216,19 @@ public class Call(
             sfuAnalytics = callAnalytics.sfuAnalytics.apply {
                 sfuAnalyticsStateHolder.updateSfuId(sfuName)
             },
+        )
+    }
+
+    /** Creates the [EmptyRtcSession] that the first join returns for HLS playback. */
+    private val playbackSessionFactory: () -> RtcSession = {
+        EmptyRtcSession(
+            client = clientImpl,
+            call = this,
+            sessionManager = sessionManager,
+            sessionId = sessionManager.sessionId,
+            apiKey = clientImpl.apiKey,
+            lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
+            sfuAnalytics = callAnalytics.sfuAnalytics,
         )
     }
 
@@ -518,6 +543,7 @@ public class Call(
     internal val mediaManager get() = media.mediaManager
 
     /** Delegate that drives the join flow (permissions, retry loop, session creation). */
+    @OptIn(ExperimentalStreamVideoApi::class)
     private val joinCoordinator = CallJoinCoordinator(
         clientImpl = clientImpl,
         state = state,
@@ -537,7 +563,16 @@ public class Call(
             clientImpl.permissionCheck
                 .checkAndroidPermissionsGroup(clientImpl.context, this@Call).first
         },
+        createPlaybackSession = playbackSessionFactory,
         consumeJoinSource = { consumeJoinSource() },
+        hlsPlayerFactory = {
+            clientImpl.hlsPlayerFactory?.let { factory ->
+                {
+                        playlistUrl ->
+                    factory.create(clientImpl.context, playlistUrl)
+                }
+            }
+        },
     )
 
     internal var reconnectDeadlineMillis: Int

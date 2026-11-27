@@ -24,6 +24,8 @@ import io.getstream.log.AndroidStreamLogger
 import io.getstream.log.StreamLog
 import io.getstream.log.streamLog
 import io.getstream.video.android.core.call.CallType
+import io.getstream.video.android.core.call.hls.HlsPlayerFactory
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
@@ -112,6 +114,13 @@ import java.net.ConnectException
  * @property rejectCallWhenBusy Automatically rejects incoming calls when the user is already in another call.
  *          When enabled, the SDK suppresses incoming call notifications.
  *          CallRingEvent will not be propagated if there is an active or ongoing ringing call.
+ * @property hlsPlayerFactory Enables HLS playback for viewers. When set, a join tells the backend
+ *          that this client can play HLS, and a call served that way plays through the player it
+ *          builds. Null by default: every call joins over WebRTC. The `stream-video-android-hls`
+ *          artifact provides `ExoHlsPlayerFactory`. A call joined over HLS stays on HLS until it is
+ *          left: if the host stops the HLS broadcast, or the viewer is granted permission to
+ *          publish, the call is not moved to WebRTC, and the viewer has to leave and join again.
+ *          Beta.
  *
  * @see build
  * @see ClientState.connection
@@ -170,6 +179,8 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val connectOnInit: Boolean = true,
     private val rejectCallWhenBusy: Boolean = false,
     private val ringStatePolling: RingStatePollingConfig? = RingStatePollingConfig(),
+    @ExperimentalStreamVideoApi
+    private val hlsPlayerFactory: HlsPlayerFactory? = null,
 ) {
     private val context: Context = context.applicationContext
     private val scope = UserScope(ClientScope())
@@ -219,6 +230,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
      * @throws IllegalArgumentException If [user] type is [UserType.Authenticated] and both [token] and [tokenProvider] are empty.
      * @throws ConnectException If the WebSocket connection fails.
      */
+    @OptIn(ExperimentalStreamVideoApi::class)
     public fun build(): StreamVideo {
         val lifecycle = ProcessLifecycleOwner.get().lifecycle
 
@@ -330,6 +342,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             },
             tokenRepository = tokenRepository,
             rejectCallWhenBusy = rejectCallWhenBusy,
+            hlsPlayerFactory = hlsPlayerFactory,
         )
 
         if (user.type == UserType.Guest) {

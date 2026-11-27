@@ -87,10 +87,12 @@ import io.getstream.result.Result.Success
 import io.getstream.video.android.core.analytics.AnalyticsModule
 import io.getstream.video.android.core.audio.AudioExecutionContext
 import io.getstream.video.android.core.call.CallBusyHandler
+import io.getstream.video.android.core.call.hls.HlsPlayerFactory
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.filter.Filters
 import io.getstream.video.android.core.filter.toMap
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.internal.module.restoreCoordinatorRequestContextFromCause
 import io.getstream.video.android.core.logging.LoggingLevel
@@ -201,6 +203,8 @@ internal class StreamVideoClient internal constructor(
     internal val enableStereoForSubscriber: Boolean = true,
     internal val telecomConfig: TelecomConfig? = null,
     internal val rejectCallWhenBusy: Boolean = false,
+    @OptIn(ExperimentalStreamVideoApi::class)
+    internal val hlsPlayerFactory: HlsPlayerFactory? = null,
     internal val analytics: AnalyticsModule = AnalyticsModule.getDefault(
         coordinatorConnectionModule.api,
         scope,
@@ -865,6 +869,7 @@ internal class StreamVideoClient internal constructor(
         migratingFromList: List<String>? = null,
         hintHighScaleLivestreamPublisher: Boolean? = null,
         e2ee: Boolean? = null,
+        playbackCapabilities: List<String>? = null,
     ): Result<JoinCallResponse> {
         val joinCallRequest = JoinCallRequest(
             create = create,
@@ -882,6 +887,7 @@ internal class StreamVideoClient internal constructor(
             migratingFrom = migratingFrom,
             migratingFromList = migratingFromList,
             hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
+            playbackCapabilities = playbackCapabilities,
         )
 
         val result = apiCall {

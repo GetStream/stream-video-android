@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.core.utils
 
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -42,5 +44,17 @@ class AtomicUnitCallTest {
             executed++
         }
         assert(executed == 1)
+    }
+
+    @Test
+    fun `hasBeenCalled is true while the block is still running`() {
+        val atomicUnitCall = AtomicUnitCall()
+        assertFalse(atomicUnitCall.hasBeenCalled)
+
+        var duringBlock: Boolean? = null
+        atomicUnitCall { duringBlock = atomicUnitCall.hasBeenCalled }
+
+        assertEquals(true, duringBlock)
+        assertTrue(atomicUnitCall.hasBeenCalled)
     }
 }
