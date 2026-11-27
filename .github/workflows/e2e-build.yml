@@ -2,6 +2,12 @@ name: E2E Build
 
 on:
   workflow_call:
+    inputs:
+      e2e_required:
+        description: "The e2e-scope job's decision, 'true' or 'false'. The build is skipped on 'false'."
+        required: false
+        type: string
+        default: 'true'
     outputs:
       built:
         description: "'true' when the apks were built; on a pull request that does not touch the E2E sources the build is skipped."
@@ -17,9 +23,14 @@ jobs:
       actions: write
       contents: read
     name: compose apks
-    # Static IP: on pull requests the build lane asks the GitHub API which files changed, and
-    # the org IP allow list only admits static-IP runners.
-    runs-on: { group: github-public-amd64 }
+    # No GitHub API calls here: e2e-scope decides on the static-IP runner whether the E2E sources
+    # changed, so a standard GitHub-hosted runner works. The 2-core runners in the static-IP group
+    # shut down mid-build.
+    runs-on: ubuntu-24.04
+    if: ${{ inputs.e2e_required == 'true' }}
+    env:
+      # Without a PR number, fastlane builds without asking the GitHub API for the changed files.
+      GITHUB_PR_NUM: ''
     outputs:
       built: ${{ steps.build_apks.outputs.built }}
     steps:
