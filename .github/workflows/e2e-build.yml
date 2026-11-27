@@ -2,6 +2,10 @@ name: E2E Build
 
 on:
   workflow_call:
+    outputs:
+      built:
+        description: "'true' when the apks were built; on a pull request that does not touch the E2E sources the build is skipped."
+        value: ${{ jobs.build.outputs.built }}
 
 env:
   # The Gradle build cache comes from the Actions cache below instead of S3.
@@ -13,7 +17,11 @@ jobs:
       actions: write
       contents: read
     name: compose apks
+    # Static IP: on pull requests the build lane asks the GitHub API which files changed, and
+    # the org IP allow list only admits static-IP runners.
     runs-on: { group: github-public-amd64 }
+    outputs:
+      built: ${{ steps.build_apks.outputs.built }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: GetStream/android-ci-actions/actions/setup-java@cb46e4f44d105a68738bfd2a1cfd156bb768665b
@@ -31,7 +39,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-e2e-
       - name: Build apks
-        run: bundle exec fastlane build_e2e_test
+        id: build_apks
+        run: |
+          bundle exec fastlane build_e2e_test
+          if ls demo-app/build/outputs/apk/e2etesting/debug/*.apk > /dev/null 2>&1; then
+            echo "built=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "built=false" >> "$GITHUB_OUTPUT"
+          fi
         timeout-minutes: 30
       - name: Save Gradle cache
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
