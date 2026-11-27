@@ -184,6 +184,17 @@ interface ProductvideoApi {
     ): io.getstream.android.video.generated.models.SendCallEventResponse
     
     /**
+     * Report HLS playback stats
+     * Reports HLS player lifecycle and playback stats for a viewer that join call sent to HLS playback
+     */
+    @POST("/video/call/{type}/{id}/hls_stats")
+    suspend fun reportHLSStats(
+        @Path("type") type: kotlin.String,
+        @Path("id") id: kotlin.String,
+        @Body reportHLSStatsRequest: io.getstream.android.video.generated.models.ReportHLSStatsRequest
+    ): io.getstream.android.video.generated.models.ReportHLSStatsResponse
+
+    /**
      * Collect user feedback
      * 
      */

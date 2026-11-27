@@ -19,6 +19,7 @@ package io.getstream.video.android.core.call.hls
 import android.content.Context
 import android.view.SurfaceView
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import kotlinx.coroutines.flow.StateFlow
@@ -65,7 +66,78 @@ public interface HlsPlayer {
 
     /** Stops playback for good. Called by the SDK when the call is left, from any thread. */
     public fun release()
+
+    /**
+     * Receives the player's state and errors, or stops when [listener] is null. The SDK publishes
+     * them as [CallState.hlsPlaybackState] and [CallState.hlsPlaybackError] and uses them for the
+     * call's HLS stats reports. Called by the SDK from any thread; the listener is called on the
+     * main thread. A player that does not report keeps the default, and the call then publishes
+     * no playback state and sends no reports.
+     */
+    public fun setPlaybackListener(listener: HlsPlaybackListener?) {}
+
+    /**
+     * Current readings for an HLS stats report, or null before playback starts or after [release].
+     * Main thread only.
+     */
+    public fun readPlaybackMetrics(): HlsPlaybackMetrics? = null
 }
+
+/** Player state and errors reported to the SDK. See [HlsPlayer.setPlaybackListener]. */
+public interface HlsPlaybackListener {
+
+    /** The player moved to [state]. Repeating the current state is allowed and ignored. */
+    public fun onPlaybackStateChanged(state: HlsPlaybackState)
+
+    /**
+     * Playback failed. [code] names the error, for example `ERROR_CODE_BEHIND_LIVE_WINDOW`, and
+     * must not contain the playlist URL.
+     */
+    public fun onPlaybackError(code: String)
+}
+
+/**
+ * Player states the SDK derives stalls and watch time from. A stall is [Playing] followed by
+ * [Buffering]; the initial [Loading], a [Seeking] and a [Paused] are not stalls.
+ */
+public enum class HlsPlaybackState {
+    /** Loading before the first frame plays. */
+    Loading,
+
+    /** Playing media. */
+    Playing,
+
+    /** Waiting for data after playback had started. */
+    Buffering,
+
+    /** Loading after a seek. */
+    Seeking,
+
+    /** Not playing because playback is paused or suppressed. */
+    Paused,
+
+    /** The broadcast ended. */
+    Ended,
+}
+
+/**
+ * Current player readings for an HLS stats report. A value the player does not know yet is 0.
+ *
+ * @property bitrateKbps Bitrate of the rendition playing now.
+ * @property bufferLengthMs Media buffered ahead of the playhead.
+ * @property liveLatencyMs Distance behind the live edge.
+ * @property droppedFrames Video frames dropped by the decoder since playback started.
+ * @property width Width of the rendition playing now, in pixels.
+ * @property height Height of the rendition playing now, in pixels.
+ */
+public class HlsPlaybackMetrics(
+    public val bitrateKbps: Int = 0,
+    public val bufferLengthMs: Long = 0,
+    public val liveLatencyMs: Long = 0,
+    public val droppedFrames: Int = 0,
+    public val width: Int = 0,
+    public val height: Int = 0,
+)
 
 /**
  * Builds the [HlsPlayer] for a call the backend serves as HLS. Pass one to

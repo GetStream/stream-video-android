@@ -18,9 +18,13 @@ package io.getstream.video.android.core.model
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.android.video.generated.infrastructure.Serializer
+import io.getstream.android.video.generated.models.HLSPlaybackStats
+import io.getstream.android.video.generated.models.HLSPlayerEvent
 import io.getstream.android.video.generated.models.JoinCallRequest
 import io.getstream.android.video.generated.models.JoinCallResponse
 import io.getstream.android.video.generated.models.PlaybackResponse
+import io.getstream.android.video.generated.models.ReportHLSStatsRequest
+import io.getstream.android.video.generated.models.StatsOptions
 import org.junit.Test
 
 class PlaybackSerializationTest {
@@ -52,6 +56,57 @@ class PlaybackSerializationTest {
                 type = PlaybackResponse.Type.Hls,
             ),
         )
+    }
+
+    @Test
+    fun `playback response parses the stats token`() {
+        val playback = Serializer.moshi.adapter(PlaybackResponse::class.java).fromJson(
+            """{"type":"hls","playlist_url":"u","reason":"percentage","stats_token":"t"}""",
+        )
+
+        assertThat(playback?.statsToken).isEqualTo("t")
+    }
+
+    @Test
+    fun `stats options parse the HLS stats settings`() {
+        val options = Serializer.moshi.adapter(StatsOptions::class.java).fromJson(
+            """{"enable_rtc_stats":true,"reporting_interval_ms":8000,"enable_hls_stats":true,"reporting_hls_interval_ms":5000}""",
+        )
+
+        assertThat(options?.enableHlsStats).isTrue()
+        assertThat(options?.reportingHlsIntervalMs).isEqualTo(5000)
+    }
+
+    @Test
+    fun `HLS stats report uses the backend field names`() {
+        val json = Serializer.moshi.adapter(ReportHLSStatsRequest::class.java).toJson(
+            ReportHLSStatsRequest(
+                statsToken = "t",
+                callSessionId = "c",
+                userSessionId = "u",
+                unifiedSessionId = "s",
+                type = "ended",
+                timestamp = 1L,
+                endReason = "left",
+                stats = HLSPlaybackStats(
+                    watchDurationMs = 2L,
+                    stallCount = 1,
+                    stallDurationMs = 3L,
+                    maxStallDurationMs = 3L,
+                ),
+                events = listOf(HLSPlayerEvent("stall_end", 4L, mapOf("duration_ms" to 3L))),
+            ),
+        )
+
+        assertThat(json).contains("\"stats_token\":\"t\"")
+        assertThat(json).contains("\"call_session_id\":\"c\"")
+        assertThat(json).contains("\"user_session_id\":\"u\"")
+        assertThat(json).contains("\"unified_session_id\":\"s\"")
+        assertThat(json).contains("\"end_reason\":\"left\"")
+        assertThat(json).contains("\"watch_duration_ms\":2")
+        assertThat(json).contains("\"max_stall_duration_ms\":3")
+        assertThat(json).contains("\"data\":{\"duration_ms\":3}")
+        assertThat(json).doesNotContain("user_id")
     }
 
     @Test

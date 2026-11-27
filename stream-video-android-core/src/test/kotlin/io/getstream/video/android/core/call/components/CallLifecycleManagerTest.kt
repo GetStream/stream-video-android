@@ -21,13 +21,17 @@ import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.hls.HlsPlaybackObserver
+import io.getstream.video.android.core.call.hls.HlsPlaybackState
 import io.getstream.video.android.core.call.hls.HlsPlayer
+import io.getstream.video.android.core.call.hls.HlsStatsReporter
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.model.PlaybackType
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import io.mockk.verifyOrder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -45,6 +49,8 @@ class CallLifecycleManagerTest {
     private lateinit var state: CallState
     private lateinit var sessionManager: CallSessionManager
     private lateinit var playbackTypeFlow: MutableStateFlow<PlaybackType>
+    private val hlsPlaybackStateFlow = MutableStateFlow<HlsPlaybackState?>(null)
+    private val hlsPlaybackErrorFlow = MutableStateFlow<String?>(null)
 
     @Before
     fun setup() {
@@ -53,6 +59,8 @@ class CallLifecycleManagerTest {
         playbackTypeFlow = MutableStateFlow(PlaybackType.Hls("https://hls.example.com/playlist.m3u8"))
         every { state._connection } returns MutableStateFlow(RealtimeConnection.Connected)
         every { state._playbackType } returns playbackTypeFlow
+        every { state._hlsPlaybackState } returns hlsPlaybackStateFlow
+        every { state._hlsPlaybackError } returns hlsPlaybackErrorFlow
     }
 
     private fun manager(): CallLifecycleManager {
@@ -94,6 +102,54 @@ class CallLifecycleManagerTest {
             verify(exactly = 1) { player.release() }
             coVerify(exactly = 0) { playbackSession.sendLeaveEvent(any()) }
         }
+
+    @Test
+    fun `leave stops HLS stats reporting before releasing the player`() = runTest(testDispatcher) {
+        val player = mockk<HlsPlayer>(relaxed = true)
+        val reporter = mockk<HlsStatsReporter>(relaxed = true)
+        sessionManager.playbackSession = mockk(relaxed = true)
+        sessionManager.hlsPlayer.value = player
+        sessionManager.hlsStatsReporter = reporter
+
+        manager().leave("user")
+        advanceUntilIdle()
+
+        assertThat(sessionManager.hlsStatsReporter).isNull()
+        verifyOrder {
+            reporter.stop()
+            player.release()
+        }
+    }
+
+    @Test
+    fun `leave stops listening to the player and resets the HLS playback state`() = runTest(
+        testDispatcher,
+    ) {
+        val player = mockk<HlsPlayer>(relaxed = true)
+        val reporter = mockk<HlsStatsReporter>(relaxed = true)
+        val observer = HlsPlaybackObserver(hlsPlaybackStateFlow, hlsPlaybackErrorFlow, reporter)
+        sessionManager.playbackSession = mockk(relaxed = true)
+        sessionManager.hlsPlayer.value = player
+        sessionManager.hlsStatsReporter = reporter
+        sessionManager.hlsPlaybackObserver = observer
+        observer.onPlaybackStateChanged(HlsPlaybackState.Ended)
+        observer.onPlaybackError("ERROR_CODE_IO_NETWORK_CONNECTION_FAILED")
+
+        manager().leave("user")
+        advanceUntilIdle()
+
+        assertThat(sessionManager.hlsPlaybackObserver).isNull()
+        assertThat(hlsPlaybackStateFlow.value).isNull()
+        assertThat(hlsPlaybackErrorFlow.value).isNull()
+        verifyOrder {
+            reporter.stop()
+            player.setPlaybackListener(null)
+            player.release()
+        }
+
+        observer.onPlaybackStateChanged(HlsPlaybackState.Playing)
+        assertThat(hlsPlaybackStateFlow.value).isNull()
+    }
 
     @Test
     fun `leave marks the call left until the next join resets the guard`() = runTest(

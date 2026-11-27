@@ -41,12 +41,15 @@ import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAb
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
+import io.getstream.video.android.core.call.hls.HlsPlaybackObserver
 import io.getstream.video.android.core.call.hls.HlsPlayer
+import io.getstream.video.android.core.call.hls.HlsStatsReporter
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.model.PlaybackType
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.ringing.RingJoinSource
 import io.getstream.video.android.core.utils.StreamRefCountedSingleFlightProcessor
+import io.getstream.video.android.core.utils.safeCall
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.NonCancellable
@@ -85,12 +88,20 @@ internal class CallJoinCoordinator(
     // Returns the builder of the call's HLS player from a playlist URL, read at join time. Null
     // when the app registered no HlsPlayerFactory: the join then never asks for HLS.
     private val hlsPlayerFactory: () -> ((playlistUrl: String) -> HlsPlayer)? = { null },
+    // Builds the reporter of the HLS player's stats, or null when HLS stats are turned off, see
+    // HlsStatsConfig.from.
+    private val createHlsStatsReporter: (HlsPlayer, JoinCallResponse) -> HlsStatsReporter? =
+        { _, _ -> null },
 ) {
     private companion object {
         const val JOIN_FLIGHT_KEY = "join"
     }
 
     private val logger by taggedLogger("Call:JoinCoordinator:$type:$id")
+
+    /** The join that granted HLS playback, kept to start a new stats session after a restart. */
+    @Volatile
+    private var playbackJoinResponse: JoinCallResponse? = null
 
     /**
      * Coalesces concurrent [join] calls into one attempt on the call [scope].
@@ -462,7 +473,7 @@ internal class CallJoinCoordinator(
             return result as Failure
         }
         result.value.playback?.let { playback ->
-            return joinPlayback(playback)
+            return joinPlayback(playback, result.value)
         }
         val sfuToken = result.value.credentials.token
         val sfuUrl = result.value.credentials.server.url
@@ -511,7 +522,10 @@ internal class CallJoinCoordinator(
      * The returned session is held as [CallSessionManager.playbackSession], never as the active
      * session, and the call's [HlsPlayer] as [CallSessionManager.hlsPlayer].
      */
-    private fun joinPlayback(playback: PlaybackResponse): Result<RtcSession> {
+    private fun joinPlayback(
+        playback: PlaybackResponse,
+        joinResponse: JoinCallResponse,
+    ): Result<RtcSession> {
         val playlistUrl = playback.playlistUrl
         // Only an absolute https URL is played; a blank or malformed one fails the join.
         val isHttpsUrl = playlistUrl.toHttpUrlOrNull()?.isHttps == true
@@ -546,12 +560,82 @@ internal class CallJoinCoordinator(
             logger.i { "[joinInternal] Joined with HLS playback (reason=${playback.reason})" }
             sessionManager.playbackSession = session
             sessionManager.hlsPlayer.value = player
+            playbackJoinResponse = joinResponse
+            val reporter = startHlsStatsReporter(player, joinResponse)
+            sessionManager.hlsStatsReporter = reporter
+            observePlayback(player, reporter)
             state._playbackType.value = PlaybackType.Hls(playlistUrl)
             state._connection.value = RealtimeConnection.Joined(session)
             callRegistry.markActive()
             state._connection.value = RealtimeConnection.Connected
             observePlaybackEnded()
             Success(session)
+        }
+    }
+
+    /**
+     * Moves HLS playback to [playlistUrl] when the broadcast restarts. A restart writes a new
+     * playlist, so the player of the old one would stay ended. Each playlist is its own stats
+     * session: the current one sends `ended`, and the new player starts a new one. Ignored when the
+     * call is not playing HLS or already plays this playlist.
+     */
+    fun onHlsBroadcastingStarted(playlistUrl: String) {
+        val createPlayer = hlsPlayerFactory() ?: return
+        if (playlistUrl.toHttpUrlOrNull()?.isHttps != true) return
+        lifecycle.withLeaveLock {
+            if (lifecycle.hasLeaveStarted() || sessionManager.playbackSession == null) {
+                return@withLeaveLock
+            }
+            val current = state._playbackType.value as? PlaybackType.Hls ?: return@withLeaveLock
+            if (current.playlistUrl == playlistUrl) return@withLeaveLock
+            val player = try {
+                createPlayer(playlistUrl)
+            } catch (e: Exception) {
+                logger.e(e) { "[onHlsBroadcastingStarted] Could not create the HLS player" }
+                return@withLeaveLock
+            }
+            logger.i { "[onHlsBroadcastingStarted] Broadcast restarted — switching HLS playlist" }
+            // Closed first, so the old player cannot report into the new session.
+            sessionManager.hlsPlaybackObserver?.close()
+            sessionManager.hlsStatsReporter?.stop()
+            val previous = sessionManager.hlsPlayer.value
+            previous?.let { safeCall { it.setPlaybackListener(null) } }
+            sessionManager.hlsPlayer.value = player
+            val reporter = playbackJoinResponse?.let { startHlsStatsReporter(player, it) }
+            sessionManager.hlsStatsReporter = reporter
+            observePlayback(player, reporter)
+            state._playbackType.value = PlaybackType.Hls(playlistUrl)
+            previous?.release()
+        }
+    }
+
+    /** Stats reporting is best effort: a reporter that fails to start leaves playback running. */
+    private fun startHlsStatsReporter(
+        player: HlsPlayer,
+        joinResponse: JoinCallResponse,
+    ): HlsStatsReporter? = try {
+        createHlsStatsReporter(player, joinResponse)
+    } catch (e: Exception) {
+        logger.e(e) { "[joinPlayback] Could not start HLS stats reporting" }
+        null
+    }
+
+    /**
+     * Listens to [player] for the whole playback, with or without stats: publishes its state and
+     * errors to [CallState] and forwards them to [reporter]. A player that rejects the listener
+     * still plays; the call then publishes no playback state.
+     */
+    private fun observePlayback(player: HlsPlayer, reporter: HlsStatsReporter?) {
+        val observer = HlsPlaybackObserver(
+            playbackState = state._hlsPlaybackState,
+            playbackError = state._hlsPlaybackError,
+            statsReporter = reporter,
+        )
+        sessionManager.hlsPlaybackObserver = observer
+        try {
+            player.setPlaybackListener(observer)
+        } catch (e: Exception) {
+            logger.e(e) { "[joinPlayback] Could not listen to the HLS player" }
         }
     }
 

@@ -134,6 +134,7 @@ internal class CallApiClient(
             hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
             e2ee = requestE2ee,
             playbackCapabilities = playbackCapabilities,
+            unifiedSessionId = sessionManager.unifiedSessionId,
         )
         result.onSuccess {
             callAnalytics.joinAnalytics.onJoinRequestSuccess(

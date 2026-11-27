@@ -178,15 +178,26 @@ internal class CallLifecycleManager(
     }
 
     private fun clearPlayback() {
+        // Closed first: a player callback still in flight cannot publish state or reach the
+        // reporter once this returns.
+        sessionManager.hlsPlaybackObserver?.close()
+        sessionManager.hlsPlaybackObserver = null
+        sessionManager.hlsStatsReporter?.stop()
+        sessionManager.hlsStatsReporter = null
         sessionManager.playbackEndedJob?.cancel()
         sessionManager.playbackEndedJob = null
         // Taken atomically: leave and cleanup() both clear playback and may run concurrently, and
         // only the one that takes the player releases it.
         val player = sessionManager.hlsPlayer.getAndUpdate { null }
         state._playbackType.value = PlaybackType.WebRtc
+        state._hlsPlaybackState.value = null
+        state._hlsPlaybackError.value = null
         sessionManager.playbackSession?.cleanup()
         sessionManager.playbackSession = null
-        player?.release()
+        if (player != null) {
+            safeCall { player.setPlaybackListener(null) }
+            player.release()
+        }
     }
 
     /** Stops the ICE and connectivity monitors. */

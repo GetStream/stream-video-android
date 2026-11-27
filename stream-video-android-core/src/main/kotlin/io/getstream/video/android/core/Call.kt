@@ -74,7 +74,10 @@ import io.getstream.video.android.core.call.components.NoiseCancellationPolicy
 import io.getstream.video.android.core.call.components.RtcSessionFactory
 import io.getstream.video.android.core.call.components.SessionMonitor
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
+import io.getstream.video.android.core.call.hls.CoordinatorHlsStatsDelivery
 import io.getstream.video.android.core.call.hls.HlsPlayer
+import io.getstream.video.android.core.call.hls.HlsStatsConfig
+import io.getstream.video.android.core.call.hls.HlsStatsReporter
 import io.getstream.video.android.core.call.scope.ScopeProvider
 import io.getstream.video.android.core.call.scope.ScopeProviderImpl
 import io.getstream.video.android.core.call.video.VideoFilter
@@ -290,7 +293,13 @@ public class Call(
         CallIceConnectionMonitor(type, id, scope, sessionManager)
 
     /** Delegate that owns the event flow, subscriptions and event dispatch. */
-    private val eventManager = CallEventManager(type, id, scope, reconnector = { reconnector })
+    private val eventManager = CallEventManager(
+        type,
+        id,
+        scope,
+        reconnector = { reconnector },
+        onHlsBroadcastingStarted = { joinCoordinator.onHlsBroadcastingStarted(it) },
+    )
 
     // Must be initialized before `state` — CallState → SortedParticipantsState
     // launches a coroutine that reads `call.events` (leaking-this race).
@@ -571,6 +580,21 @@ public class Call(
                         playlistUrl ->
                     factory.create(clientImpl.context, playlistUrl)
                 }
+            }
+        },
+        createHlsStatsReporter = { player, joinResponse ->
+            HlsStatsConfig.from(
+                response = joinResponse,
+                unifiedSessionId = sessionManager.unifiedSessionId,
+                statsReportingEnabled = clientImpl.enableStatsCollection,
+            )?.let { config ->
+                HlsStatsReporter(
+                    config = config,
+                    player = player,
+                    delivery = CoordinatorHlsStatsDelivery(clientImpl, type, id),
+                    // The ended report outlives the call scope, which leave cancels.
+                    scope = clientImpl.scope,
+                )
             }
         },
     )

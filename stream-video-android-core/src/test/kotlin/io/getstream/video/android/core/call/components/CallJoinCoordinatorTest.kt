@@ -40,7 +40,11 @@ import io.getstream.video.android.core.base.DispatcherRule
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
+import io.getstream.video.android.core.call.hls.HlsPlaybackListener
+import io.getstream.video.android.core.call.hls.HlsPlaybackObserver
+import io.getstream.video.android.core.call.hls.HlsPlaybackState
 import io.getstream.video.android.core.call.hls.HlsPlayer
+import io.getstream.video.android.core.call.hls.HlsStatsReporter
 import io.getstream.video.android.core.call.scope.ScopeProvider
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.model.PlaybackType
@@ -81,6 +85,8 @@ class CallJoinCoordinatorTest {
 
     private companion object {
         const val HLS_URL = "https://hls.example.com/playlist.m3u8"
+        const val RESTARTED_HLS_URL = "https://hls.example.com/restarted/playlist.m3u8"
+        const val HLS_ERROR = "ERROR_CODE_IO_NETWORK_CONNECTION_FAILED"
     }
 
     @get:Rule
@@ -111,6 +117,10 @@ class CallJoinCoordinatorTest {
     private lateinit var hlsPlayerFlow: MutableStateFlow<HlsPlayer?>
     private lateinit var callSessionFlow: MutableStateFlow<CallSessionResponse?>
     private var heldPlaybackEndedJob: Job? = null
+    private lateinit var hlsPlaybackStateFlow: MutableStateFlow<HlsPlaybackState?>
+    private lateinit var hlsPlaybackErrorFlow: MutableStateFlow<String?>
+    private var heldPlaybackObserver: HlsPlaybackObserver? = null
+    private var playerListener: HlsPlaybackListener? = null
 
     @Before
     fun setup() {
@@ -148,7 +158,18 @@ class CallJoinCoordinatorTest {
             heldPlaybackSession = firstArg()
         }
         hlsPlayer = mockk(relaxed = true)
+        playerListener = null
+        every { hlsPlayer.setPlaybackListener(any()) } answers { playerListener = firstArg() }
         hlsPlayerFlow = MutableStateFlow(null)
+        hlsPlaybackStateFlow = MutableStateFlow(null)
+        hlsPlaybackErrorFlow = MutableStateFlow(null)
+        every { state._hlsPlaybackState } returns hlsPlaybackStateFlow
+        every { state._hlsPlaybackError } returns hlsPlaybackErrorFlow
+        heldPlaybackObserver = null
+        every { sessionManager.hlsPlaybackObserver } answers { heldPlaybackObserver }
+        every { sessionManager.hlsPlaybackObserver = any() } answers {
+            heldPlaybackObserver = firstArg()
+        }
         every { sessionManager.hlsPlayer } returns hlsPlayerFlow
         callSessionFlow = MutableStateFlow(null)
         every { state.session } returns callSessionFlow
@@ -170,6 +191,10 @@ class CallJoinCoordinatorTest {
 
     private fun coordinator(
         createHlsPlayer: ((String) -> HlsPlayer)? = { hlsPlayer },
+        createHlsStatsReporter: (
+            HlsPlayer,
+            JoinCallResponse,
+        ) -> HlsStatsReporter? = { _, _ -> null },
     ) = CallJoinCoordinator(
         clientImpl = clientImpl,
         state = state,
@@ -188,6 +213,7 @@ class CallJoinCoordinatorTest {
         hasRequiredPermissions = { true },
         createPlaybackSession = { playbackSession },
         hlsPlayerFactory = { createHlsPlayer },
+        createHlsStatsReporter = createHlsStatsReporter,
     )
 
     /** Replaces the mocked session manager and lifecycle with real ones sharing the test scope. */
@@ -914,6 +940,201 @@ class CallJoinCoordinatorTest {
         coVerify(exactly = 0) { mockSession.connectInternal() }
         verify(exactly = 0) { sessionMonitor.monitorSession(any()) }
         verify(exactly = 0) { media.updateMediaManagerFromSettings(any()) }
+    }
+
+    @Test
+    fun `HLS playback starts stats reporting for the installed player`() = runTest(testDispatcher) {
+        stubHlsPlayback()
+        val reporter = mockk<HlsStatsReporter>(relaxed = true)
+        var reportedPlayer: HlsPlayer? = null
+        var reportedResponse: JoinCallResponse? = null
+
+        coordinator(
+            createHlsStatsReporter = { player, response ->
+                reportedPlayer = player
+                reportedResponse = response
+                reporter
+            },
+        ).join()
+        advanceUntilIdle()
+
+        assertThat(reportedPlayer).isSameInstanceAs(hlsPlayer)
+        assertThat(reportedResponse).isSameInstanceAs(mockJoinResponse)
+        verify { sessionManager.hlsStatsReporter = reporter }
+
+        playerListener!!.onPlaybackStateChanged(HlsPlaybackState.Playing)
+        playerListener!!.onPlaybackError(HLS_ERROR)
+
+        assertThat(hlsPlaybackStateFlow.value).isEqualTo(HlsPlaybackState.Playing)
+        assertThat(hlsPlaybackErrorFlow.value).isEqualTo(HLS_ERROR)
+        verify { reporter.onPlaybackStateChanged(HlsPlaybackState.Playing) }
+        verify { reporter.onPlaybackError(HLS_ERROR) }
+    }
+
+    @Test
+    fun `HLS playback publishes the player state with stats reporting off`() = runTest(
+        testDispatcher,
+    ) {
+        stubHlsPlayback()
+
+        coordinator(createHlsStatsReporter = { _, _ -> null }).join()
+        advanceUntilIdle()
+        assertThat(hlsPlaybackStateFlow.value).isNull()
+        assertThat(heldPlaybackObserver).isNotNull()
+
+        playerListener!!.onPlaybackStateChanged(HlsPlaybackState.Playing)
+        assertThat(hlsPlaybackStateFlow.value).isEqualTo(HlsPlaybackState.Playing)
+
+        playerListener!!.onPlaybackError(HLS_ERROR)
+        assertThat(hlsPlaybackErrorFlow.value).isEqualTo(HLS_ERROR)
+
+        playerListener!!.onPlaybackStateChanged(HlsPlaybackState.Playing)
+        assertThat(hlsPlaybackErrorFlow.value).isNull()
+
+        playerListener!!.onPlaybackStateChanged(HlsPlaybackState.Ended)
+        assertThat(hlsPlaybackStateFlow.value).isEqualTo(HlsPlaybackState.Ended)
+    }
+
+    @Test
+    fun `a player that rejects the listener still plays`() = runTest(testDispatcher) {
+        stubHlsPlayback()
+        every { hlsPlayer.setPlaybackListener(any()) } throws IllegalStateException("no listener")
+
+        val result = coordinator().join()
+        advanceUntilIdle()
+
+        assertThat((result as Success).value).isSameInstanceAs(playbackSession)
+        assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.Hls(HLS_URL))
+        verify { callRegistry.markActive() }
+    }
+
+    @Test
+    fun `leaving resets the HLS playback state and ignores later player callbacks`() = runTest(
+        testDispatcher,
+    ) {
+        val sessions = useRealLifecycle()
+        stubHlsPlayback()
+        val reporter = mockk<HlsStatsReporter>(relaxed = true)
+
+        coordinator(createHlsStatsReporter = { _, _ -> reporter }).join()
+        advanceUntilIdle()
+        val listener = playerListener!!
+        listener.onPlaybackStateChanged(HlsPlaybackState.Ended)
+        listener.onPlaybackError(HLS_ERROR)
+
+        lifecycle.leave("user")
+        advanceUntilIdle()
+
+        assertThat(hlsPlaybackStateFlow.value).isNull()
+        assertThat(hlsPlaybackErrorFlow.value).isNull()
+        assertThat(sessions.hlsPlaybackObserver).isNull()
+        verify { hlsPlayer.setPlaybackListener(null) }
+
+        // A callback already posted to the main thread before the listener was cleared.
+        listener.onPlaybackStateChanged(HlsPlaybackState.Playing)
+        listener.onPlaybackError(HLS_ERROR)
+
+        assertThat(hlsPlaybackStateFlow.value).isNull()
+        assertThat(hlsPlaybackErrorFlow.value).isNull()
+        verify(exactly = 1) { reporter.onPlaybackStateChanged(any()) }
+        verify(exactly = 1) { reporter.onPlaybackError(any()) }
+    }
+
+    @Test
+    fun `a restarted broadcast moves playback to the new playlist in a new stats session`() =
+        runTest(testDispatcher) {
+            stubHlsPlayback()
+            var heldReporter: HlsStatsReporter? = null
+            every { sessionManager.hlsStatsReporter } answers { heldReporter }
+            every { sessionManager.hlsStatsReporter = any() } answers { heldReporter = firstArg() }
+            val firstReporter = mockk<HlsStatsReporter>(relaxed = true)
+            val restartedReporter = mockk<HlsStatsReporter>(relaxed = true)
+            val restartedPlayer = mockk<HlsPlayer>(relaxed = true)
+            val coordinator = coordinator(
+                createHlsPlayer = { url ->
+                    if (url == RESTARTED_HLS_URL) restartedPlayer else hlsPlayer
+                },
+                createHlsStatsReporter = { player, _ ->
+                    if (player === restartedPlayer) restartedReporter else firstReporter
+                },
+            )
+            coordinator.join()
+            advanceUntilIdle()
+            val firstObserver = heldPlaybackObserver!!
+
+            coordinator.onHlsBroadcastingStarted(RESTARTED_HLS_URL)
+
+            assertThat(hlsPlayerFlow.value).isSameInstanceAs(restartedPlayer)
+            assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.Hls(RESTARTED_HLS_URL))
+            verify { firstReporter.stop() }
+            assertThat(heldReporter).isSameInstanceAs(restartedReporter)
+            assertThat(heldPlaybackObserver).isNotSameInstanceAs(firstObserver)
+            verify { restartedPlayer.setPlaybackListener(heldPlaybackObserver) }
+            verify { hlsPlayer.setPlaybackListener(null) }
+            verify { hlsPlayer.release() }
+
+            // The old player's late callbacks no longer reach the call state.
+            firstObserver.onPlaybackStateChanged(HlsPlaybackState.Ended)
+            assertThat(hlsPlaybackStateFlow.value).isNotEqualTo(HlsPlaybackState.Ended)
+        }
+
+    @Test
+    fun `a broadcast start for the current playlist keeps the player`() = runTest(testDispatcher) {
+        stubHlsPlayback()
+        var created = 0
+        val coordinator = coordinator(createHlsPlayer = {
+            created++
+            hlsPlayer
+        })
+        coordinator.join()
+        advanceUntilIdle()
+
+        coordinator.onHlsBroadcastingStarted(HLS_URL)
+
+        assertThat(created).isEqualTo(1)
+        verify(exactly = 0) { hlsPlayer.release() }
+    }
+
+    @Test
+    fun `a broadcast start without HLS playback does nothing`() = runTest(testDispatcher) {
+        var created = 0
+
+        coordinator(createHlsPlayer = {
+            created++
+            hlsPlayer
+        })
+            .onHlsBroadcastingStarted(RESTARTED_HLS_URL)
+
+        assertThat(created).isEqualTo(0)
+        assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.WebRtc)
+    }
+
+    @Test
+    fun `stats reporting that fails to start does not fail the HLS join`() = runTest(
+        testDispatcher,
+    ) {
+        stubHlsPlayback()
+        val result = coordinator(
+            createHlsStatsReporter = { _, _ -> throw IllegalStateException("no stats") },
+        ).join()
+        advanceUntilIdle()
+
+        assertThat((result as Success).value).isSameInstanceAs(playbackSession)
+        assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.Hls(HLS_URL))
+        verify { sessionManager.hlsStatsReporter = null }
+        verify { callRegistry.markActive() }
+    }
+
+    @Test
+    fun `a WebRTC join does not start HLS stats reporting`() = runTest(testDispatcher) {
+        stubJoinCall(Success(mockJoinResponse))
+        coEvery { mockSession.connectInternal() } returns SfuConnectionResult.Success
+        var created = false
+
+        coordinator(createHlsStatsReporter = { _, _ -> null.also { created = true } }).join()
+        advanceUntilIdle()
+
+        assertThat(created).isFalse()
     }
 
     @Test

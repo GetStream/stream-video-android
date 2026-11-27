@@ -337,6 +337,7 @@ class CallApiClientTest {
             clientImpl.joinCall(
                 any(), any(), any(), any(), any(), any(), any(), any(),
                 any(), any(), any(), any(), any(), any(), any(), any(),
+                any(),
             )
         } returns Result.Failure(io.getstream.result.Error.GenericError("boom"))
 
@@ -350,6 +351,7 @@ class CallApiClientTest {
             clientImpl.joinCall(
                 any(), any(), any(), any(), any(), any(), any(), any(),
                 any(), any(), any(), any(), any(), any(), any(), any(),
+                any(),
             )
         }
     }
@@ -376,6 +378,7 @@ class CallApiClientTest {
             clientImpl.joinCall(
                 any(), any(), any(), any(), any(), any(), any(), any(),
                 any(), any(), any(), any(), any(), any(), any(), any(),
+                any(),
             )
         } returns Result.Failure(io.getstream.result.Error.GenericError("boom"))
 
@@ -402,6 +405,7 @@ class CallApiClientTest {
                 hintHighScaleLivestreamPublisher = any(),
                 e2ee = true,
                 playbackCapabilities = any(),
+                unifiedSessionId = any(),
             )
         }
     }
@@ -414,6 +418,7 @@ class CallApiClientTest {
             clientImpl.joinCall(
                 any(), any(), any(), any(), any(), any(), any(), any(),
                 any(), any(), any(), any(), any(), any(), any(), any(),
+                any(),
             )
         } returns Result.Failure(io.getstream.result.Error.GenericError("boom"))
 
@@ -450,5 +455,44 @@ class CallApiClientTest {
             hintHighScaleLivestreamPublisher = any(),
             e2ee = any(),
             playbackCapabilities = capabilities,
+            unifiedSessionId = any(),
         )
+
+    @Test
+    fun `joinRequest sends the call's unified session id`() = runTest(testDispatcher) {
+        coEvery {
+            clientImpl.joinCall(
+                any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(), any(),
+                any(),
+            )
+        } returns Result.Failure(io.getstream.result.Error.GenericError("boom"))
+
+        apiClient.joinRequest(
+            location = "test-location",
+            joinAnalyticsModel = JoinAnalyticsModel(0, JoinReason.FirstAttempt),
+        )
+
+        coVerify {
+            clientImpl.joinCall(
+                type = any(),
+                id = any(),
+                create = any(),
+                members = any(),
+                custom = any(),
+                settingsOverride = any(),
+                startsAt = any(),
+                team = any(),
+                ring = any(),
+                notify = any(),
+                location = any(),
+                migratingFrom = any(),
+                migratingFromList = any(),
+                hintHighScaleLivestreamPublisher = any(),
+                e2ee = any(),
+                playbackCapabilities = any(),
+                unifiedSessionId = sessionManager.unifiedSessionId,
+            )
+        }
+    }
 }
