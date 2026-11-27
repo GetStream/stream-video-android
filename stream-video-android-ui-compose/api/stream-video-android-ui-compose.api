@@ -2036,7 +2036,7 @@ public final class io/getstream/video/android/compose/ui/components/livestream/C
 }
 
 public final class io/getstream/video/android/compose/ui/components/livestream/LivestreamPlayerKt {
-	public static final fun LivestreamPlayer (Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/Call;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function4;Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererConfig;Lkotlinx/coroutines/flow/Flow;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function5;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;III)V
+	public static final fun LivestreamPlayer (Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/Call;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function4;Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererConfig;Lkotlinx/coroutines/flow/Flow;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function5;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function5;Landroidx/compose/runtime/Composer;III)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/livestream/LivestreamPlayerOverlayKt {
