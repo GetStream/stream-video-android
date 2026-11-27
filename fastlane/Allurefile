@@ -53,12 +53,16 @@ lane :allure_start_regression do |options|
   )
 end
 
+# The fields of the workflow run that allure_create_launch reads, built locally rather than
+# fetched from the GitHub API: the nightly E2E jobs run on GitHub-hosted runners, which the org
+# IP allow list rejects.
 def github_run_details
   return nil unless is_ci
 
-  github_path = "#{ENV.fetch('GITHUB_API_URL', nil)}/repos/#{ENV.fetch('GITHUB_REPOSITORY', nil)}/actions/runs/#{ENV.fetch('GITHUB_RUN_ID', nil)}"
-  output = sh(command: "curl -s -H 'authorization: Bearer #{ENV.fetch('GITHUB_TOKEN', nil)}' -X GET -G #{github_path}")
-  JSON.parse(output)
+  {
+    'name' => ENV.fetch('GITHUB_WORKFLOW', nil),
+    'head_commit' => { 'message' => sh('git log -1 --format=%B', log: false).strip }
+  }
 end
 
 desc 'https://github.com/allure-framework/allure-kotlin/issues/73'
